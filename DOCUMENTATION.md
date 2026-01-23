@@ -85,14 +85,30 @@ npm run android
 ## Required Permissions
 
 The app requires the following Android permissions:
+
+### Basic Permissions
 - `INTERNET` - For API communication
+- `ACCESS_NETWORK_STATE` - For network monitoring
+
+### SMS Permissions (Runtime)
 - `SEND_SMS` - For SMS functionality
 - `READ_SMS` - For SMS management
 - `RECEIVE_SMS` - For SMS receiving
 - `READ_PHONE_STATE` - For device information
-- `ACCESS_NETWORK_STATE` - For network monitoring
+
+### 24/7 Operation Permissions (Critical)
 - `BATTERY_STATS` - For battery monitoring
-- `RECEIVE_BOOT_COMPLETED` - For auto-start on boot
+- `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` - Exempts app from battery optimization (requested at startup)
+- `WAKE_LOCK` - Prevents device from sleeping during critical operations
+- `FOREGROUND_SERVICE` - Enables continuous background operation
+- `SCHEDULE_EXACT_ALARM` - Ensures precise timing for periodic tasks (Android 12+)
+- `USE_EXACT_ALARM` - Alternative exact alarm permission (Android 12+)
+
+### Auto-Start Permissions
+- `RECEIVE_BOOT_COMPLETED` - For auto-start on device boot
+- `LOCKED_BOOT_COMPLETED` - For auto-start in direct boot mode (Android 7+)
+
+**Important**: The app automatically requests battery optimization exemption on first launch to ensure uninterrupted 24/7 operation. Users should approve this request for optimal performance.
 
 ## Configuration
 
@@ -225,8 +241,19 @@ All logs and queue data are encrypted using AES-256 encryption before being stor
 ## User Interface
 
 ### Dashboard Screen
-- System health monitoring
-- Quick navigation to:
+- **Modern Design**: Updated with improved visual hierarchy and iconography
+- **Configuration Panel**: Collapsible panel (collapsed by default) showing:
+  - Device information (ID, model, system version, app version)
+  - API configuration (URL, username, masked password)
+  - Polling intervals (SMS, Health, Command)
+  - JSON configuration view for developers
+  - Deployment context for multi-device setups
+- **System Health Monitoring**: Real-time display of:
+  - Battery level and charging status
+  - RAM usage
+  - Network connectivity and speed
+  - SMS permissions
+- **Quick Navigation**: Icon-based buttons to:
   - Settings
   - Logs viewer
   - Command queue viewer
@@ -268,6 +295,7 @@ All logs and queue data are encrypted using AES-256 encryption before being stor
 ```
 src/
 ├── components/      # Reusable UI components
+│   └── ConfigurationPanel.tsx  # NEW: Collapsible configuration display
 ├── screens/         # Screen components
 │   ├── DashboardScreen.tsx
 │   ├── SettingsScreen.tsx

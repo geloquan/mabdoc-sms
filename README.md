@@ -24,6 +24,9 @@ npm run android
 - 🗂️ **Command Queue**: Laravel-style queue for remote commands
 - 🔍 **Search & Filter**: Powerful filtering and search capabilities
 - 📈 **Statistics**: Real-time statistics for logs and queue
+- **NEW** 🎛️ **Configuration Panel**: Collapsible panel showing device and API configuration in JSON format (perfect for developers and multi-device deployments)
+- **NEW** 🔋 **24/7 Operation**: Battery optimization exemption and wake locks ensure continuous operation
+- **NEW** 🎨 **Modern UI/UX**: Redesigned dashboard with improved visual hierarchy and iconography
 
 ### Documentation
 
@@ -41,11 +44,20 @@ See [settings-example.json](./settings-example.json) for a sample configuration 
 
 ### Required Permissions
 
-- SMS (send/receive)
+#### Runtime Permissions
+- SMS (send/receive/read)
+- Phone state access
 - Internet access
 - Network state monitoring
-- Battery monitoring
-- Boot receiver (auto-start)
+
+#### System Permissions for 24/7 Operation
+- **Battery Optimization Exemption**: App requests to be excluded from battery optimization
+- **Wake Lock**: Prevents device from sleeping during critical operations
+- **Foreground Service**: Enables continuous background operation
+- **Exact Alarms**: Ensures precise timing for periodic tasks
+- **Boot Receiver**: Auto-start on device boot and reboot
+
+The app automatically requests battery optimization exemption on first launch to ensure uninterrupted 24/7 operation.
 
 ### Development
 
