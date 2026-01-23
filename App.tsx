@@ -1,23 +1,23 @@
 /**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
+ * SMS Sender Application
  * @format
  */
 
-import { NewAppScreen } from '@react-native/new-app-screen';
-import { StatusBar, StyleSheet, useColorScheme, View } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { StatusBar, StyleSheet, View, TouchableOpacity, Text } from 'react-native';
 import {
   SafeAreaProvider,
   useSafeAreaInsets,
 } from 'react-native-safe-area-context';
+import DashboardScreen from './src/screens/DashboardScreen';
+import SettingsScreen from './src/screens/SettingsScreen';
+import BackgroundTaskService from './src/services/BackgroundTaskService';
+import SystemMonitorService from './src/services/SystemMonitorService';
 
 function App() {
-  const isDarkMode = useColorScheme() === 'dark';
-
   return (
     <SafeAreaProvider>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
+      <StatusBar barStyle="dark-content" />
       <AppContent />
     </SafeAreaProvider>
   );
@@ -25,13 +25,46 @@ function App() {
 
 function AppContent() {
   const safeAreaInsets = useSafeAreaInsets();
+  const [currentScreen, setCurrentScreen] = useState<'dashboard' | 'settings'>(
+    'dashboard',
+  );
+
+  useEffect(() => {
+    // Initialize the app
+    initializeApp();
+
+    return () => {
+      // Cleanup when app unmounts
+      BackgroundTaskService.stop();
+    };
+  }, []);
+
+  const initializeApp = async () => {
+    // Request necessary permissions
+    await SystemMonitorService.requestSmsPermission();
+
+    // Start background tasks
+    await BackgroundTaskService.start();
+  };
 
   return (
-    <View style={styles.container}>
-      <NewAppScreen
-        templateFileName="App.tsx"
-        safeAreaInsets={safeAreaInsets}
-      />
+    <View style={[styles.container, { paddingTop: safeAreaInsets.top }]}>
+      {currentScreen === 'dashboard' ? (
+        <DashboardScreen
+          onNavigateToSettings={() => setCurrentScreen('settings')}
+        />
+      ) : (
+        <View style={styles.container}>
+          <SettingsScreen />
+          <View style={styles.backButtonContainer}>
+            <TouchableOpacity
+              style={styles.backButton}
+              onPress={() => setCurrentScreen('dashboard')}>
+              <Text style={styles.backButtonText}>Back to Dashboard</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
     </View>
   );
 }
@@ -39,6 +72,24 @@ function AppContent() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#f5f5f5',
+  },
+  backButtonContainer: {
+    position: 'absolute',
+    bottom: 20,
+    left: 20,
+    right: 20,
+  },
+  backButton: {
+    backgroundColor: '#6c757d',
+    padding: 15,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  backButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
 
