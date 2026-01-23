@@ -21,12 +21,12 @@ class BootReceiver : BroadcastReceiver() {
                 Log.d(TAG, "Starting MainActivity after boot")
                 
                 try {
-                    val i = Intent(context, MainActivity::class.java).apply {
+                    val mainActivityIntent = Intent(context, MainActivity::class.java).apply {
                         addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                         addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
                         addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
                     }
-                    context.startActivity(i)
+                    context.startActivity(mainActivityIntent)
                     Log.d(TAG, "MainActivity started successfully")
                 } catch (e: Exception) {
                     Log.e(TAG, "Error starting MainActivity: ${e.message}", e)

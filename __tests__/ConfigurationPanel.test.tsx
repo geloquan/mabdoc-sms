@@ -30,32 +30,32 @@ jest.mock('../src/services/SettingsService', () => ({
 
 describe('ConfigurationPanel Component', () => {
   test('renders correctly when collapsed', async () => {
-    let component;
+    let component: ReactTestRenderer.ReactTestRenderer;
     await ReactTestRenderer.act(() => {
       component = ReactTestRenderer.create(<ConfigurationPanel collapsed={true} />);
     });
     
-    const tree = component.toJSON();
+    const tree = component!.toJSON();
     expect(tree).toBeTruthy();
   });
 
   test('renders correctly when expanded', async () => {
-    let component;
+    let component: ReactTestRenderer.ReactTestRenderer;
     await ReactTestRenderer.act(() => {
       component = ReactTestRenderer.create(<ConfigurationPanel collapsed={false} />);
     });
     
-    const tree = component.toJSON();
+    const tree = component!.toJSON();
     expect(tree).toBeTruthy();
   });
 
   test('defaults to collapsed state', async () => {
-    let component;
+    let component: ReactTestRenderer.ReactTestRenderer;
     await ReactTestRenderer.act(() => {
       component = ReactTestRenderer.create(<ConfigurationPanel />);
     });
     
-    const tree = component.toJSON();
+    const tree = component!.toJSON();
     expect(tree).toBeTruthy();
   });
 });

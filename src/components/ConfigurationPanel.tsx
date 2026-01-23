@@ -47,6 +47,12 @@ const ConfigurationPanel: React.FC<ConfigurationPanelProps> = ({
     setDeviceInfo(info);
   };
 
+  // Helper function for consistent password masking
+  const maskPassword = (password: string, maxLength: number = 20): string => {
+    if (!password) return '';
+    return '•'.repeat(Math.min(password.length, maxLength));
+  };
+
   const getConfigurationJSON = () => {
     if (!settings) return {};
     
@@ -62,7 +68,7 @@ const ConfigurationPanel: React.FC<ConfigurationPanelProps> = ({
         apiUrl: settings.apiUrl,
         username: settings.username,
         // Hide password for security, show masked version
-        password: settings.password ? '•'.repeat(settings.password.length) : '',
+        password: maskPassword(settings.password),
         intervals: {
           sms: `${settings.smsInterval}s`,
           health: `${settings.healthInterval}s`,
@@ -113,7 +119,7 @@ const ConfigurationPanel: React.FC<ConfigurationPanelProps> = ({
             <Text style={styles.sectionTitle}>🌐 API Configuration</Text>
             {renderConfigValue('API URL', settings.apiUrl || 'Not configured')}
             {renderConfigValue('Username', settings.username || 'Not configured')}
-            {renderConfigValue('Password', settings.password ? '•'.repeat(Math.min(settings.password.length, 20)) : 'Not configured')}
+            {renderConfigValue('Password', maskPassword(settings.password) || 'Not configured')}
           </View>
 
           {/* Polling Intervals Section */}
