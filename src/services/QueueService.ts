@@ -260,7 +260,15 @@ class QueueService {
     };
     
     queue.forEach(item => {
-      stats[item.status]++;
+      if (item.status === 'pending') {
+        stats.pending++;
+      } else if (item.status === 'executing') {
+        stats.executing++;
+      } else if (item.status === 'completed') {
+        stats.completed++;
+      } else if (item.status === 'failed') {
+        stats.failed++;
+      }
     });
     
     return stats;

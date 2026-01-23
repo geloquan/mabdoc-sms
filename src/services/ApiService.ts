@@ -24,7 +24,7 @@ class ApiService {
     startTime: number,
   ): Promise<void> {
     const log: LogEntry = {
-      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`,
       type,
       timestamp: Date.now(),
       endpoint,

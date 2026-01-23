@@ -212,7 +212,9 @@ class LogsService {
     };
     
     logs.forEach(log => {
-      stats.byType[log.type]++;
+      if (log.type === LogType.SMS || log.type === LogType.HEALTH || log.type === LogType.COMMAND) {
+        stats.byType[log.type]++;
+      }
       if (log.success) {
         stats.successCount++;
       } else {

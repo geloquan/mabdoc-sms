@@ -44,7 +44,7 @@ const LogsScreen: React.FC = () => {
     setRefreshing(false);
   };
 
-  const applyFilters = async () => {
+  const applyFilters = () => {
     let filtered = [...logs];
 
     // Filter by type

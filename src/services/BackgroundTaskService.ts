@@ -55,7 +55,7 @@ class BackgroundTaskService {
         if (response.success && response.data) {
           // Add command to queue
           const queueItem: QueueItem = {
-            id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+            id: `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`,
             command: response.data.command,
             parameters: response.data.parameters,
             timestamp: Date.now(),
