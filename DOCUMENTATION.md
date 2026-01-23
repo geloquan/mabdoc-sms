@@ -1,6 +1,6 @@
 # SMS Sender Application
 
-A React Native Android application for automated SMS sending with system monitoring and health reporting capabilities.
+A React Native Android application for automated SMS sending with system monitoring, health reporting, and secure data logging capabilities.
 
 ## Features
 
@@ -24,6 +24,26 @@ The application performs periodic API calls to:
   - Health data posting interval
   - Command fetching interval
 - Import/Export settings as JSON
+
+### Secure Data Logging
+- **Encrypted Storage**: All logs and queue data are encrypted using AES-256 encryption
+- **API Logs**: Automatically logs all API calls with rich metadata
+  - Request/response details
+  - Timestamps and duration
+  - Success/error status
+  - Battery level and network type at time of request
+- **Command Queue**: Stores and manages remote commands in a queue
+  - Laravel v11-style queue implementation
+  - Status tracking (pending, processing, completed, failed)
+  - Retry failed commands
+  - Rich metadata support
+- **Search & Filter**: Powerful search and filtering capabilities
+  - Filter by type (SMS/Health logs)
+  - Filter by status (pending, completed, failed)
+  - Text search across all fields
+  - Date range filtering
+- **Import/Export**: Export logs and queue data as JSON for backup or analysis
+- **Privacy**: Data is encrypted and unreadable without the app's encryption key
 
 ### Background Operation
 - Auto-starts on device boot
@@ -150,6 +170,98 @@ Fetches commands to execute on the device.
 }
 ```
 
+## Data Storage and Security
+
+### Encryption
+All logs and queue data are encrypted using AES-256 encryption before being stored locally. The encryption key is automatically generated and stored securely on first use.
+
+### Log Entry Format
+```json
+{
+  "id": "1234567890-abc123",
+  "endpoint": "/api/sms/machine",
+  "timestamp": 1234567890000,
+  "type": "sms",
+  "request": {
+    "method": "GET",
+    "headers": {...},
+    "body": {...}
+  },
+  "response": {
+    "status": 200,
+    "data": {...},
+    "error": null
+  },
+  "metadata": {
+    "duration": 150,
+    "batteryLevel": 85.5,
+    "networkType": "wifi"
+  }
+}
+```
+
+### Queue Entry Format
+```json
+{
+  "id": "1234567890-xyz789",
+  "command": "restart",
+  "parameters": {...},
+  "status": "pending",
+  "timestamp": 1234567890000,
+  "executedAt": null,
+  "result": null,
+  "error": null,
+  "metadata": {
+    "retryCount": 0,
+    "priority": 1
+  }
+}
+```
+
+### Storage Limits
+- **Logs**: Maximum 1000 entries (oldest entries are automatically removed)
+- **Queue**: Maximum 500 entries
+
+## User Interface
+
+### Dashboard Screen
+- System health monitoring
+- Quick navigation to:
+  - Settings
+  - Logs viewer
+  - Command queue viewer
+
+### Settings Screen
+- API configuration
+- Authentication settings
+- Polling intervals
+- Import/Export settings
+
+### Logs Viewer Screen
+- View all API logs
+- Filter by type (SMS/Health)
+- Search functionality
+- Expandable log details
+- Export/Import logs
+- Statistics display:
+  - Total logs
+  - Success count
+  - Error count
+
+### Queue Viewer Screen
+- View command queue
+- Filter by status (pending, processing, completed, failed)
+- Search functionality
+- Expandable queue entry details
+- Retry failed commands
+- Clear completed entries
+- Export/Import queue
+- Statistics display:
+  - Total entries
+  - Pending count
+  - Completed count
+  - Failed count
+
 ## Architecture
 
 ### Directory Structure
@@ -158,14 +270,19 @@ src/
 ├── components/      # Reusable UI components
 ├── screens/         # Screen components
 │   ├── DashboardScreen.tsx
-│   └── SettingsScreen.tsx
+│   ├── SettingsScreen.tsx
+│   ├── LogViewerScreen.tsx
+│   └── QueueViewerScreen.tsx
 ├── services/        # Business logic and API services
 │   ├── ApiService.ts
 │   ├── BackgroundTaskService.ts
 │   ├── SettingsService.ts
-│   └── SystemMonitorService.ts
+│   ├── SystemMonitorService.ts
+│   ├── LogStorageService.ts
+│   └── QueueStorageService.ts
 ├── utils/           # Utility functions
-│   └── CommandExecutor.ts
+│   ├── CommandExecutor.ts
+│   └── EncryptionUtil.ts
 ├── types/           # TypeScript type definitions
 │   └── index.ts
 └── config/          # Configuration constants
@@ -176,9 +293,12 @@ src/
 
 1. **SettingsService**: Manages app settings using AsyncStorage
 2. **SystemMonitorService**: Monitors device health metrics
-3. **ApiService**: Handles all API communications with Basic Auth
+3. **ApiService**: Handles all API communications with Basic Auth, logs all requests
 4. **BackgroundTaskService**: Manages periodic background tasks
-5. **CommandExecutor**: Executes remote commands
+5. **CommandExecutor**: Executes remote commands and updates queue status
+6. **LogStorageService**: Manages encrypted storage of API logs with search/filter capabilities
+7. **QueueStorageService**: Manages encrypted command queue with status tracking
+8. **EncryptionUtil**: Provides AES-256 encryption/decryption for secure data storage
 
 ## Development
 

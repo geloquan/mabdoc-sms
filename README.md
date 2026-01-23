@@ -2,7 +2,7 @@
 
 ## SMS Sender Application
 
-A React Native Android application for automated SMS sending with system monitoring and health reporting capabilities.
+A React Native Android application for automated SMS sending with system monitoring, health reporting, and secure data logging capabilities.
 
 ### Quick Start
 
@@ -17,8 +17,13 @@ npm run android
 - 🔄 **Automated API Calls**: Periodic health reporting and command fetching
 - ⚙️ **Configurable Settings**: Adjustable intervals and API endpoints
 - 🔐 **Secure Authentication**: Basic authentication support
-- 📤 **Import/Export**: JSON-based settings management
+- 📤 **Import/Export**: JSON-based settings, logs, and queue management
 - 🚀 **Auto-Start**: Launches automatically on device boot
+- 🔒 **Encrypted Storage**: AES-256 encrypted logs and queue data
+- 📊 **Data Logging**: Comprehensive API call logging with rich metadata
+- 🗂️ **Command Queue**: Laravel-style queue for remote commands
+- 🔍 **Search & Filter**: Powerful filtering and search capabilities
+- 📈 **Statistics**: Real-time statistics for logs and queue
 
 ### Documentation
 
@@ -27,6 +32,7 @@ See [DOCUMENTATION.md](./DOCUMENTATION.md) for comprehensive documentation inclu
 - API endpoint specifications
 - Configuration guide
 - Architecture overview
+- Data storage and encryption details
 - Troubleshooting tips
 
 ### Example Configuration
@@ -55,17 +61,30 @@ npm run android
 
 # Run on iOS
 npm run ios
+
+# Run tests
+npm test
 ```
 
 ### API Endpoints
 
 The application communicates with three main endpoints:
 
-1. `GET /api/sms/machine` - Fetch SMS data
-2. `POST /api/sms/machine/health` - Send system health data
-3. `GET /api/sms/machine/command` - Fetch remote commands
+1. `GET /api/sms/machine` - Fetch SMS data (logged automatically)
+2. `POST /api/sms/machine/health` - Send system health data (logged automatically)
+3. `GET /api/sms/machine/command` - Fetch remote commands (queued automatically)
 
-All endpoints use Basic Authentication.
+All endpoints use Basic Authentication. All API calls are automatically logged with encryption for security.
+
+### Data Management
+
+The app provides comprehensive data management features:
+
+- **Logs Viewer**: View, search, and filter all API call logs
+- **Queue Viewer**: Manage command queue with retry capabilities
+- **Import/Export**: Backup and restore logs and queue data
+- **Encryption**: All stored data is encrypted using AES-256
+- **Statistics**: Real-time insights into API performance and queue status
 
 ---
 
