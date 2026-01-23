@@ -88,19 +88,24 @@ class SystemMonitorService {
   async requestSmsPermission(): Promise<boolean> {
     if (Platform.OS === 'android') {
       try {
-        const granted = await PermissionsAndroid.request(
+        // Request all necessary SMS and phone permissions for 24/7 operation
+        const permissions = [
           PermissionsAndroid.PERMISSIONS.SEND_SMS,
-          {
-            title: 'SMS Permission',
-            message: 'This app needs access to send SMS messages',
-            buttonNeutral: 'Ask Me Later',
-            buttonNegative: 'Cancel',
-            buttonPositive: 'OK',
-          },
+          PermissionsAndroid.PERMISSIONS.READ_SMS,
+          PermissionsAndroid.PERMISSIONS.RECEIVE_SMS,
+          PermissionsAndroid.PERMISSIONS.READ_PHONE_STATE,
+        ];
+
+        const granted = await PermissionsAndroid.requestMultiple(permissions);
+        
+        // Check if all permissions are granted
+        const allGranted = Object.values(granted).every(
+          status => status === PermissionsAndroid.RESULTS.GRANTED
         );
-        return granted === PermissionsAndroid.RESULTS.GRANTED;
+        
+        return allGranted;
       } catch (error) {
-        console.error('Error requesting SMS permission:', error);
+        console.error('Error requesting SMS permissions:', error);
         return false;
       }
     }

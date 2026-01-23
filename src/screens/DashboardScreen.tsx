@@ -8,6 +8,7 @@ import {
   RefreshControl,
 } from 'react-native';
 import SystemMonitorService from '../services/SystemMonitorService';
+import ConfigurationPanel from '../components/ConfigurationPanel';
 import { SystemHealth } from '../types';
 
 interface DashboardScreenProps {
@@ -66,28 +67,37 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }>
       <View style={styles.header}>
-        <Text style={styles.title}>SMS Sender Dashboard</Text>
+        <View style={styles.headerTop}>
+          <Text style={styles.title}>📱 SMS Sender Dashboard</Text>
+          <Text style={styles.subtitle}>Multi-Device SMS Processing Unit</Text>
+        </View>
         <View style={styles.headerButtons}>
           <TouchableOpacity
-            style={styles.settingsButton}
+            style={styles.navButton}
             onPress={onNavigateToLogs}>
-            <Text style={styles.settingsButtonText}>Logs</Text>
+            <Text style={styles.navButtonIcon}>📄</Text>
+            <Text style={styles.navButtonText}>Logs</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={styles.settingsButton}
+            style={styles.navButton}
             onPress={onNavigateToQueue}>
-            <Text style={styles.settingsButtonText}>Queue</Text>
+            <Text style={styles.navButtonIcon}>📋</Text>
+            <Text style={styles.navButtonText}>Queue</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={styles.settingsButton}
+            style={styles.navButton}
             onPress={onNavigateToSettings}>
-            <Text style={styles.settingsButtonText}>Settings</Text>
+            <Text style={styles.navButtonIcon}>⚙️</Text>
+            <Text style={styles.navButtonText}>Settings</Text>
           </TouchableOpacity>
         </View>
       </View>
 
+      {/* Configuration Panel - Collapsed by default */}
+      <ConfigurationPanel collapsed={true} />
+
       <View style={styles.content}>
-        <Text style={styles.sectionTitle}>System Health</Text>
+        <Text style={styles.sectionTitle}>💚 System Health</Text>
 
         {health ? (
           <>
@@ -142,78 +152,103 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#f8f9fa',
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
     padding: 20,
     backgroundColor: '#fff',
     borderBottomWidth: 1,
     borderBottomColor: '#e0e0e0',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  headerTop: {
+    marginBottom: 12,
   },
   title: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: 'bold',
-    color: '#333',
-    flex: 1,
+    color: '#1a1a1a',
+    marginBottom: 4,
+  },
+  subtitle: {
+    fontSize: 14,
+    color: '#666',
+    fontStyle: 'italic',
   },
   headerButtons: {
     flexDirection: 'row',
-    gap: 8,
+    gap: 10,
+    justifyContent: 'space-around',
   },
-  settingsButton: {
-    backgroundColor: '#007AFF',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 6,
+  navButton: {
+    flex: 1,
+    backgroundColor: '#2196F3',
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+    borderRadius: 8,
+    alignItems: 'center',
+    shadowColor: '#2196F3',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 3,
   },
-  settingsButtonText: {
+  navButtonIcon: {
+    fontSize: 20,
+    marginBottom: 4,
+  },
+  navButtonText: {
     color: '#fff',
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: '600',
   },
   content: {
     padding: 20,
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 15,
-    color: '#333',
+    color: '#1a1a1a',
   },
   healthItem: {
     backgroundColor: '#fff',
-    padding: 15,
-    borderRadius: 8,
-    marginBottom: 10,
+    padding: 16,
+    borderRadius: 10,
+    marginBottom: 12,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
     elevation: 2,
+    borderLeftWidth: 4,
+    borderLeftColor: '#2196F3',
   },
   healthItemLeft: {
     flex: 1,
   },
   healthLabel: {
-    fontSize: 14,
+    fontSize: 13,
     color: '#666',
-    marginBottom: 4,
+    marginBottom: 6,
+    fontWeight: '500',
   },
   healthValue: {
     fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
+    fontWeight: '700',
+    color: '#1a1a1a',
   },
   statusBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
   },
   statusGood: {
     backgroundColor: '#4CAF50',
@@ -223,16 +258,21 @@ const styles = StyleSheet.create({
   },
   statusText: {
     color: '#fff',
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: 'bold',
+    letterSpacing: 0.5,
   },
   timestampContainer: {
-    marginTop: 15,
+    marginTop: 20,
+    padding: 12,
+    backgroundColor: '#e3f2fd',
+    borderRadius: 8,
     alignItems: 'center',
   },
   timestampText: {
-    fontSize: 12,
-    color: '#999',
+    fontSize: 13,
+    color: '#1976D2',
+    fontWeight: '500',
   },
 });
 
