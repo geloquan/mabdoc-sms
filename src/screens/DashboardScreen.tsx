@@ -29,18 +29,6 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({
   });
   const [refreshing, setRefreshing] = useState(false);
 
-  useEffect(() => {
-    loadData();
-    const interval = setInterval(loadHealth, 5000); // Update every 5 seconds
-    return () => clearInterval(interval);
-  }, []);
-
-  const loadData = async () => {
-    await loadHealth();
-    await loadSettings();
-    await loadDeviceInfo();
-  };
-
   const loadHealth = async () => {
     const healthData = await SystemMonitorService.getSystemHealth();
     setHealth(healthData);
@@ -58,9 +46,23 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({
     setDeviceInfo({ deviceId, model, systemVersion });
   };
 
+  useEffect(() => {
+    const loadData = async () => {
+      await loadHealth();
+      await loadSettings();
+      await loadDeviceInfo();
+    };
+
+    loadData();
+    const interval = setInterval(loadHealth, 5000); // Update every 5 seconds
+    return () => clearInterval(interval);
+  }, []);
+
   const onRefresh = async () => {
     setRefreshing(true);
-    await loadData();
+    await loadHealth();
+    await loadSettings();
+    await loadDeviceInfo();
     setRefreshing(false);
   };
 
