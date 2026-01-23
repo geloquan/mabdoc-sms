@@ -13,7 +13,6 @@ class CommandExecutor {
         await this.restartDevice();
         break;
       case 'shutdown':
-        // Note: Shutdown is not typically available without root access
         console.log('Shutdown command received but not implemented');
         break;
       default:
