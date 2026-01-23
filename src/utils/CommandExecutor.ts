@@ -1,5 +1,5 @@
 import { CommandResponse } from '../types';
-import { NativeModules, Platform } from 'react-native';
+import { Platform } from 'react-native';
 
 class CommandExecutor {
   async executeCommand(commandResponse: CommandResponse): Promise<void> {

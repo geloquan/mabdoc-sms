@@ -117,7 +117,7 @@ const SettingsScreen: React.FC = () => {
           style={styles.input}
           value={String(settings.smsInterval)}
           onChangeText={(text) =>
-            setSettings({ ...settings, smsInterval: parseInt(text) || 60 })
+            setSettings({ ...settings, smsInterval: parseInt(text, 10) || 60 })
           }
           keyboardType="numeric"
           placeholder="60"
@@ -128,7 +128,7 @@ const SettingsScreen: React.FC = () => {
           style={styles.input}
           value={String(settings.healthInterval)}
           onChangeText={(text) =>
-            setSettings({ ...settings, healthInterval: parseInt(text) || 120 })
+            setSettings({ ...settings, healthInterval: parseInt(text, 10) || 120 })
           }
           keyboardType="numeric"
           placeholder="120"
@@ -139,7 +139,7 @@ const SettingsScreen: React.FC = () => {
           style={styles.input}
           value={String(settings.commandInterval)}
           onChangeText={(text) =>
-            setSettings({ ...settings, commandInterval: parseInt(text) || 60 })
+            setSettings({ ...settings, commandInterval: parseInt(text, 10) || 60 })
           }
           keyboardType="numeric"
           placeholder="60"

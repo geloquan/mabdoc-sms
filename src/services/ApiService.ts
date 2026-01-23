@@ -1,11 +1,12 @@
 import { AppSettings, ApiResponse, CommandResponse, SystemHealth } from '../types';
 import { API_ENDPOINTS } from '../config/constants';
+import { encode } from 'base-64';
 
 class ApiService {
-  private getHeaders(settings: AppSettings): HeadersInit {
-    const credentials = Buffer.from(
+  private getHeaders(settings: AppSettings): Record<string, string> {
+    const credentials = encode(
       `${settings.username}:${settings.password}`,
-    ).toString('base64');
+    );
 
     return {
       'Content-Type': 'application/json',

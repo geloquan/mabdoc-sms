@@ -1,4 +1,3 @@
-import BackgroundService from 'react-native-background-actions';
 import SettingsService from './SettingsService';
 import ApiService from './ApiService';
 import SystemMonitorService from './SystemMonitorService';
@@ -6,9 +5,9 @@ import CommandExecutor from '../utils/CommandExecutor';
 
 class BackgroundTaskService {
   private isRunning = false;
-  private smsIntervalId: NodeJS.Timeout | null = null;
-  private healthIntervalId: NodeJS.Timeout | null = null;
-  private commandIntervalId: NodeJS.Timeout | null = null;
+  private smsIntervalId: ReturnType<typeof setInterval> | null = null;
+  private healthIntervalId: ReturnType<typeof setInterval> | null = null;
+  private commandIntervalId: ReturnType<typeof setInterval> | null = null;
 
   async start(): Promise<void> {
     if (this.isRunning) {
