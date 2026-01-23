@@ -38,7 +38,7 @@ class CommandExecutor {
       await QueueStorageService.updateEntryStatus(
         entry.id,
         'completed',
-        { executedAt: Date.now() }
+        { success: true }
       );
     } catch (error) {
       console.error('Error executing queue entry:', error);

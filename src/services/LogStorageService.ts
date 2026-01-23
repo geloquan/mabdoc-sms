@@ -95,8 +95,15 @@ class LogStorageService {
 
         if (criteria.searchText) {
           const searchLower = criteria.searchText.toLowerCase();
-          const logString = JSON.stringify(log).toLowerCase();
-          if (!logString.includes(searchLower)) {
+          // Search only in specific safe fields
+          const searchableText = [
+            log.endpoint,
+            log.type,
+            log.response?.error || '',
+            String(log.response?.status || ''),
+          ].join(' ').toLowerCase();
+          
+          if (!searchableText.includes(searchLower)) {
             return false;
           }
         }

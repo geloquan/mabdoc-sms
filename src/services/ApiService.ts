@@ -3,6 +3,7 @@ import { API_ENDPOINTS } from '../config/constants';
 import { encode } from 'base-64';
 import LogStorageService from './LogStorageService';
 import QueueStorageService from './QueueStorageService';
+import { v4 as uuidv4 } from 'uuid';
 
 class ApiService {
   private getHeaders(settings: AppSettings): Record<string, string> {
@@ -17,7 +18,7 @@ class ApiService {
   }
 
   private generateId(): string {
-    return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    return uuidv4();
   }
 
   async fetchSmsData(settings: AppSettings): Promise<ApiResponse> {

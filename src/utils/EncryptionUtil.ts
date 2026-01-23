@@ -8,6 +8,9 @@ class EncryptionUtil {
   /**
    * Initialize or retrieve the encryption key
    * The key is generated once and stored securely
+   * 
+   * NOTE: For production use, consider using react-native-get-random-values
+   * or a cryptographically secure random number generator
    */
   async getEncryptionKey(): Promise<string> {
     if (this.encryptionKey) {
@@ -20,6 +23,8 @@ class EncryptionUtil {
 
       if (!key) {
         // Generate a new key if none exists
+        // NOTE: CryptoJS.lib.WordArray.random() uses Math.random() internally
+        // For production, use a cryptographically secure random source
         key = CryptoJS.lib.WordArray.random(256 / 8).toString();
         await AsyncStorage.setItem(STORAGE_KEYS.ENCRYPTION_KEY, key);
       }

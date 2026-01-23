@@ -15,11 +15,30 @@ class QueueStorageService {
       queue.push(entry);
 
       // Keep only the most recent MAX_QUEUE_SIZE entries
+      // Remove only completed or failed entries if over limit
       if (queue.length > this.MAX_QUEUE_SIZE) {
-        queue.shift(); // Remove oldest
+        const sorted = [...queue].sort((a, b) => {
+          // Prioritize keeping pending and processing entries
+          if (a.status === 'pending' || a.status === 'processing') {
+            if (b.status === 'completed' || b.status === 'failed') {
+              return -1; // Keep a
+            }
+          }
+          if (b.status === 'pending' || b.status === 'processing') {
+            if (a.status === 'completed' || a.status === 'failed') {
+              return 1; // Keep b
+            }
+          }
+          // Sort by timestamp for entries with same priority
+          return a.timestamp - b.timestamp;
+        });
+        // Keep the entries we want to preserve
+        const entriesToKeep = sorted.slice(0, this.MAX_QUEUE_SIZE);
+        await this.saveQueue(entriesToKeep);
+      } else {
+        await this.saveQueue(queue);
       }
 
-      await this.saveQueue(queue);
       return true;
     } catch (error) {
       console.error('Error adding to queue:', error);

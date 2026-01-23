@@ -2,6 +2,8 @@
  * @format
  */
 
+/* global jest */
+
 // Mock AsyncStorage with in-memory storage
 const mockStorage = new Map();
 
