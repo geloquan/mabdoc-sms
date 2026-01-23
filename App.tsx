@@ -11,8 +11,13 @@ import {
 } from 'react-native-safe-area-context';
 import DashboardScreen from './src/screens/DashboardScreen';
 import SettingsScreen from './src/screens/SettingsScreen';
+import LogsScreen from './src/screens/LogsScreen';
+import QueueScreen from './src/screens/QueueScreen';
 import BackgroundTaskService from './src/services/BackgroundTaskService';
 import SystemMonitorService from './src/services/SystemMonitorService';
+import EncryptionService from './src/services/EncryptionService';
+
+type ScreenType = 'dashboard' | 'settings' | 'logs' | 'queue';
 
 function App() {
   return (
@@ -25,9 +30,7 @@ function App() {
 
 function AppContent() {
   const safeAreaInsets = useSafeAreaInsets();
-  const [currentScreen, setCurrentScreen] = useState<'dashboard' | 'settings'>(
-    'dashboard',
-  );
+  const [currentScreen, setCurrentScreen] = useState<ScreenType>('dashboard');
 
   useEffect(() => {
     // Initialize the app
@@ -40,6 +43,9 @@ function AppContent() {
   }, []);
 
   const initializeApp = async () => {
+    // Initialize encryption service
+    await EncryptionService.initialize();
+
     // Request necessary permissions
     await SystemMonitorService.requestSmsPermission();
 
@@ -47,22 +53,38 @@ function AppContent() {
     await BackgroundTaskService.start();
   };
 
+  const renderScreen = () => {
+    switch (currentScreen) {
+      case 'dashboard':
+        return (
+          <DashboardScreen
+            onNavigateToSettings={() => setCurrentScreen('settings')}
+            onNavigateToLogs={() => setCurrentScreen('logs')}
+            onNavigateToQueue={() => setCurrentScreen('queue')}
+          />
+        );
+      case 'settings':
+        return <SettingsScreen />;
+      case 'logs':
+        return <LogsScreen />;
+      case 'queue':
+        return <QueueScreen />;
+      default:
+        return null;
+    }
+  };
+
   return (
     <View style={[styles.container, { paddingTop: safeAreaInsets.top }]}>
-      {currentScreen === 'dashboard' ? (
-        <DashboardScreen
-          onNavigateToSettings={() => setCurrentScreen('settings')}
-        />
-      ) : (
-        <View style={styles.container}>
-          <SettingsScreen />
-          <View style={styles.backButtonContainer}>
-            <TouchableOpacity
-              style={styles.backButton}
-              onPress={() => setCurrentScreen('dashboard')}>
-              <Text style={styles.backButtonText}>Back to Dashboard</Text>
-            </TouchableOpacity>
-          </View>
+      {renderScreen()}
+      
+      {currentScreen !== 'dashboard' && (
+        <View style={styles.backButtonContainer}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => setCurrentScreen('dashboard')}>
+            <Text style={styles.backButtonText}>Back to Dashboard</Text>
+          </TouchableOpacity>
         </View>
       )}
     </View>

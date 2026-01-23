@@ -2,6 +2,8 @@ import SettingsService from './SettingsService';
 import ApiService from './ApiService';
 import SystemMonitorService from './SystemMonitorService';
 import CommandExecutor from '../utils/CommandExecutor';
+import QueueService from './QueueService';
+import { QueueItem } from '../types';
 
 class BackgroundTaskService {
   private isRunning = false;
@@ -51,7 +53,33 @@ class BackgroundTaskService {
         const currentSettings = await SettingsService.getSettings();
         const response = await ApiService.fetchCommands(currentSettings);
         if (response.success && response.data) {
-          await CommandExecutor.executeCommand(response.data);
+          // Add command to queue
+          const queueItem: QueueItem = {
+            id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+            command: response.data.command,
+            parameters: response.data.parameters,
+            timestamp: Date.now(),
+            status: 'pending',
+            metadata: {},
+          };
+          
+          await QueueService.addToQueue(queueItem);
+          
+          // Execute the command
+          try {
+            await QueueService.updateQueueItem(queueItem.id, { status: 'executing' });
+            await CommandExecutor.executeCommand(response.data);
+            await QueueService.updateQueueItem(queueItem.id, {
+              status: 'completed',
+              executedAt: Date.now(),
+            });
+          } catch (error) {
+            await QueueService.updateQueueItem(queueItem.id, {
+              status: 'failed',
+              error: error instanceof Error ? error.message : 'Unknown error',
+              executedAt: Date.now(),
+            });
+          }
         }
       } catch (error) {
         console.error('Error in command interval:', error);

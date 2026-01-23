@@ -9,6 +9,8 @@ export const DEFAULT_SETTINGS = {
 
 export const STORAGE_KEYS = {
   SETTINGS: '@app_settings',
+  LOGS: '@mabdoc_logs',
+  QUEUE: '@mabdoc_queue',
 };
 
 export const API_ENDPOINTS = {

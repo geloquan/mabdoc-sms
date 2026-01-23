@@ -12,10 +12,14 @@ import { SystemHealth } from '../types';
 
 interface DashboardScreenProps {
   onNavigateToSettings: () => void;
+  onNavigateToLogs: () => void;
+  onNavigateToQueue: () => void;
 }
 
 const DashboardScreen: React.FC<DashboardScreenProps> = ({
   onNavigateToSettings,
+  onNavigateToLogs,
+  onNavigateToQueue,
 }) => {
   const [health, setHealth] = useState<SystemHealth | null>(null);
   const [refreshing, setRefreshing] = useState(false);
@@ -63,11 +67,23 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({
       }>
       <View style={styles.header}>
         <Text style={styles.title}>SMS Sender Dashboard</Text>
-        <TouchableOpacity
-          style={styles.settingsButton}
-          onPress={onNavigateToSettings}>
-          <Text style={styles.settingsButtonText}>Settings</Text>
-        </TouchableOpacity>
+        <View style={styles.headerButtons}>
+          <TouchableOpacity
+            style={styles.headerButton}
+            onPress={onNavigateToLogs}>
+            <Text style={styles.headerButtonText}>Logs</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.headerButton}
+            onPress={onNavigateToQueue}>
+            <Text style={styles.headerButtonText}>Queue</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.headerButton}
+            onPress={onNavigateToSettings}>
+            <Text style={styles.headerButtonText}>Settings</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       <View style={styles.content}>
@@ -141,16 +157,21 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     color: '#333',
+    flex: 1,
   },
-  settingsButton: {
+  headerButtons: {
+    flexDirection: 'row',
+    gap: 5,
+  },
+  headerButton: {
     backgroundColor: '#007AFF',
-    paddingHorizontal: 15,
+    paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 6,
   },
-  settingsButtonText: {
+  headerButtonText: {
     color: '#fff',
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: '600',
   },
   content: {

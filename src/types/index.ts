@@ -30,3 +30,41 @@ export interface ApiResponse<T = any> {
   data?: T;
   error?: string;
 }
+
+export enum LogType {
+  SMS = 'sms',
+  HEALTH = 'health',
+  COMMAND = 'command',
+}
+
+export interface LogEntry {
+  id: string;
+  type: LogType;
+  timestamp: number;
+  endpoint: string;
+  method: 'GET' | 'POST';
+  request?: any;
+  response?: any;
+  success: boolean;
+  error?: string;
+  metadata?: {
+    duration?: number;
+    statusCode?: number;
+    [key: string]: any;
+  };
+}
+
+export interface QueueItem {
+  id: string;
+  command: string;
+  parameters?: Record<string, any>;
+  timestamp: number;
+  status: 'pending' | 'executing' | 'completed' | 'failed';
+  result?: any;
+  error?: string;
+  executedAt?: number;
+  metadata?: {
+    retryCount?: number;
+    [key: string]: any;
+  };
+}
