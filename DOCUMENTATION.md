@@ -124,7 +124,6 @@ Sends system health data to the server.
 {
   "batteryLevel": 85.5,
   "batteryCharging": true,
-  "cpuUsage": 0,
   "ramUsage": 45.2,
   "networkSpeed": {
     "download": 50,
@@ -213,7 +212,7 @@ The app is configured to automatically start when the device boots using `BootRe
 
 ## Known Limitations
 
-1. **CPU Usage**: Direct CPU usage monitoring is not available in React Native; the value is always 0.
+1. **CPU Usage**: Direct CPU usage monitoring is not available in React Native and has been excluded from health reporting.
 2. **Network Speed**: Network speed is estimated based on connection type, not actual measured speed.
 3. **Command Execution**: Device restart requires special permissions and may not work on all devices without root access.
 

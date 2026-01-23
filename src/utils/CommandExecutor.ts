@@ -9,8 +9,6 @@ class CommandExecutor {
 
     switch (command.toLowerCase()) {
       case 'restart':
-        await this.restartDevice();
-        break;
       case 'reboot':
         await this.restartDevice();
         break;

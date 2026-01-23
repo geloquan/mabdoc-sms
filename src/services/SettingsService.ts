@@ -32,6 +32,20 @@ class SettingsService {
   async importSettings(jsonString: string): Promise<boolean> {
     try {
       const settings = JSON.parse(jsonString);
+      
+      // Validate that required properties exist
+      if (
+        typeof settings.apiUrl !== 'string' ||
+        typeof settings.username !== 'string' ||
+        typeof settings.password !== 'string' ||
+        typeof settings.smsInterval !== 'number' ||
+        typeof settings.healthInterval !== 'number' ||
+        typeof settings.commandInterval !== 'number'
+      ) {
+        console.error('Invalid settings format');
+        return false;
+      }
+      
       return await this.saveSettings(settings);
     } catch (error) {
       console.error('Error importing settings:', error);

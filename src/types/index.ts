@@ -10,7 +10,6 @@ export interface AppSettings {
 export interface SystemHealth {
   batteryLevel: number;
   batteryCharging: boolean;
-  cpuUsage: number;
   ramUsage: number;
   networkSpeed: {
     download: number;

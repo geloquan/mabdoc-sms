@@ -118,7 +118,6 @@ class SystemMonitorService {
     return {
       batteryLevel: batteryLevel * 100,
       batteryCharging,
-      cpuUsage: 0, // CPU usage is not directly available in React Native
       ramUsage: memoryInfo.usagePercent,
       networkSpeed,
       hasInternetAccess,
