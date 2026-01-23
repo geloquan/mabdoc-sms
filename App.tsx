@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { StatusBar, StyleSheet, View, TouchableOpacity, Text } from 'react-native';
+import { StatusBar, StyleSheet, View, TouchableOpacity, Text, PermissionsAndroid, Platform } from 'react-native';
 import {
   SafeAreaProvider,
   useSafeAreaInsets,
@@ -42,6 +42,27 @@ function AppContent() {
   const initializeApp = async () => {
     // Request necessary permissions
     await SystemMonitorService.requestSmsPermission();
+    
+    // Request additional permissions for 24/7 operation on Android
+    if (Platform.OS === 'android') {
+      try {
+        const permissions = [
+          PermissionsAndroid.PERMISSIONS.SEND_SMS,
+          PermissionsAndroid.PERMISSIONS.READ_SMS,
+          PermissionsAndroid.PERMISSIONS.RECEIVE_SMS,
+          PermissionsAndroid.PERMISSIONS.READ_PHONE_STATE,
+        ];
+        
+        // Request notification permission for Android 13+
+        if (Platform.Version >= 33) {
+          permissions.push(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS);
+        }
+        
+        await PermissionsAndroid.requestMultiple(permissions);
+      } catch (error) {
+        console.error('Error requesting permissions:', error);
+      }
+    }
 
     // Start background tasks
     await BackgroundTaskService.start();
