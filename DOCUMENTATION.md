@@ -35,6 +35,42 @@ The application can receive and execute system-level commands from the API, incl
 - Device restart/reboot
 - Custom app-wide commands
 
+### Logs and Queue Management (NEW)
+The application now includes comprehensive logging and queue management features:
+
+#### Encrypted Logs Storage
+- **Automatic Logging**: All API calls (SMS, Health, Command) are automatically logged
+- **Secure Storage**: Logs are encrypted using device-specific AES encryption keys
+- **Rich Metadata**: Each log entry includes:
+  - Request and response data
+  - Execution duration
+  - Success/failure status
+  - Error messages (if any)
+  - Timestamps
+- **Search and Filter**: Logs can be searched by keyword and filtered by:
+  - Type (SMS, Health, Command)
+  - Status (Success, Failed)
+- **Storage Limit**: Maximum 1,000 log entries (oldest entries are automatically removed)
+- **Import/Export**: Logs can be exported and imported in encrypted JSON format
+
+#### Command Queue
+- **Queue Management**: All commands from the API are queued before execution
+- **Status Tracking**: Each queue item tracks:
+  - Pending, Executing, Completed, or Failed status
+  - Execution timestamps
+  - Error messages
+  - Retry counts
+- **Secure Storage**: Queue data is encrypted using the same encryption as logs
+- **Search and Filter**: Queue items can be searched and filtered by status
+- **Storage Limit**: Maximum 500 queue items
+- **Import/Export**: Queue can be exported and imported in encrypted JSON format
+
+#### Security Features
+- **Device-Specific Encryption**: Encryption keys are generated from device-specific information
+- **AES Encryption**: Industry-standard AES encryption for all stored data
+- **Unreadable by Foreigners**: Encrypted data cannot be read without the device's encryption key
+- **Secure Import/Export**: Exported data remains encrypted and can only be decrypted on the same device
+
 ## Installation
 
 ### Prerequisites
@@ -176,9 +212,51 @@ src/
 
 1. **SettingsService**: Manages app settings using AsyncStorage
 2. **SystemMonitorService**: Monitors device health metrics
-3. **ApiService**: Handles all API communications with Basic Auth
-4. **BackgroundTaskService**: Manages periodic background tasks
+3. **ApiService**: Handles all API communications with Basic Auth and automatic logging
+4. **BackgroundTaskService**: Manages periodic background tasks and queue execution
 5. **CommandExecutor**: Executes remote commands
+6. **EncryptionService**: Provides AES encryption for secure data storage
+7. **LogsService**: Manages encrypted storage and retrieval of API logs
+8. **QueueService**: Manages encrypted command queue with status tracking
+
+## User Interface
+
+### Dashboard Screen
+The main screen displays:
+- Real-time system health metrics
+- Battery level and charging status
+- RAM usage
+- Network connectivity and speed
+- SMS permissions status
+- Navigation buttons to Settings, Logs, and Queue screens
+
+### Settings Screen
+Configure all application settings:
+- API URL and credentials
+- Polling intervals for each endpoint
+- Import/Export settings as JSON
+
+### Logs Screen (NEW)
+View and manage API call logs:
+- **View**: See all API calls with detailed information
+- **Search**: Search logs by keyword
+- **Filter**: Filter by type (SMS, Health, Command) or status (Success, Failed)
+- **Statistics**: View total logs, success count, and failure count
+- **Export**: Export encrypted logs for backup or analysis
+- **Import**: Import previously exported logs
+- **Clear**: Remove all logs from storage
+
+### Queue Screen (NEW)
+Manage the command queue:
+- **View**: See all queued commands with status
+- **Search**: Search queue by command name or parameters
+- **Filter**: Filter by status (Pending, Executing, Completed, Failed)
+- **Statistics**: View queue statistics by status
+- **Export**: Export encrypted queue for backup
+- **Import**: Import previously exported queue
+- **Clear Done**: Remove completed commands
+- **Clear All**: Remove all queue items
+- **Remove**: Remove individual queue items
 
 ## Development
 
@@ -209,6 +287,9 @@ The app is configured to automatically start when the device boots using `BootRe
 2. **HTTPS**: Always use HTTPS for API communications in production.
 3. **Command Execution**: Be cautious with remote command execution. Validate and sanitize all commands.
 4. **Permissions**: Request only necessary permissions and explain their usage to users.
+5. **Encrypted Storage**: Logs and queue data are encrypted using device-specific AES keys
+6. **Data Protection**: Encrypted data cannot be read on other devices or without proper decryption keys
+7. **Export Security**: Exported logs and queue remain encrypted and require the same device to decrypt
 
 ## Known Limitations
 

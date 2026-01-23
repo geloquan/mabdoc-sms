@@ -42,6 +42,20 @@ This document provides a high-level overview of the implemented SMS sender appli
 - ✅ Command execution framework
 - ✅ Support for restart/reboot commands
 - ✅ Extensible command system
+- ✅ Command queue with status tracking
+- ✅ Queue persistence with encryption
+
+#### Logs and Queue Management (NEW)
+- ✅ Automatic API call logging
+- ✅ Encrypted log storage (AES encryption)
+- ✅ Device-specific encryption keys
+- ✅ Log search and filtering
+- ✅ Command queue management
+- ✅ Queue status tracking (pending/executing/completed/failed)
+- ✅ Encrypted queue storage
+- ✅ Import/Export for logs and queue
+- ✅ Storage limits (1000 logs, 500 queue items)
+- ✅ Rich metadata for logs and queue items
 
 ### 2. User Interface
 
@@ -59,6 +73,24 @@ This document provides a high-level overview of the implemented SMS sender appli
 - Save and restart background tasks
 - Back navigation
 
+#### Logs Screen (NEW)
+- View all API call logs
+- Search logs by keyword
+- Filter by type (SMS, Health, Command)
+- Filter by status (Success, Failed)
+- Statistics display
+- Import/Export encrypted logs
+- Clear logs functionality
+
+#### Queue Screen (NEW)
+- View command queue
+- Search queue by keyword
+- Filter by status (Pending, Executing, Completed, Failed)
+- Statistics display
+- Import/Export encrypted queue
+- Remove individual items
+- Clear completed or all items
+
 ### 3. Technical Architecture
 
 ```
@@ -68,12 +100,17 @@ mabdoc-sms/
 │   │   └── constants.ts          # App-wide constants
 │   ├── screens/
 │   │   ├── DashboardScreen.tsx   # Main monitoring UI
-│   │   └── SettingsScreen.tsx    # Configuration UI
+│   │   ├── SettingsScreen.tsx    # Configuration UI
+│   │   ├── LogsScreen.tsx        # Logs viewer (NEW)
+│   │   └── QueueScreen.tsx       # Queue manager (NEW)
 │   ├── services/
-│   │   ├── ApiService.ts         # API communication
-│   │   ├── BackgroundTaskService.ts  # Periodic tasks
+│   │   ├── ApiService.ts         # API communication + logging
+│   │   ├── BackgroundTaskService.ts  # Periodic tasks + queue
 │   │   ├── SettingsService.ts    # Settings management
-│   │   └── SystemMonitorService.ts   # System monitoring
+│   │   ├── SystemMonitorService.ts   # System monitoring
+│   │   ├── EncryptionService.ts  # AES encryption (NEW)
+│   │   ├── LogsService.ts        # Logs management (NEW)
+│   │   └── QueueService.ts       # Queue management (NEW)
 │   ├── types/
 │   │   └── index.ts              # TypeScript types
 │   └── utils/
@@ -115,9 +152,11 @@ mabdoc-sms/
 - `react-native-permissions` - Permission management
 - `react-native-background-actions` - Background tasks
 - `base-64` - Authentication encoding
+- `crypto-js` - AES encryption (NEW)
 
 **Development:**
 - `@types/base-64` - TypeScript types
+- `@types/crypto-js` - TypeScript types (NEW)
 - `@types/node` - Node types
 
 ### 6. Code Quality
@@ -176,6 +215,10 @@ mabdoc-sms/
 - Fetches commands every `commandInterval` seconds
 - Dashboard updates every 5 seconds
 - All operations run in background
+- All API calls are automatically logged
+- Commands are queued before execution
+- Queue items track execution status
+- Logs and queue data are encrypted and stored locally
 
 ## API Contract
 
@@ -219,6 +262,17 @@ Before deployment, verify:
 - [ ] API calls are made at correct intervals
 - [ ] Health data is accurate
 - [ ] Dashboard updates properly
+- [ ] Import/Export works for settings
+- [ ] App auto-starts on boot
+- [ ] Background tasks continue when app is minimized
+- [ ] Logs screen displays API calls (NEW)
+- [ ] Logs can be searched and filtered (NEW)
+- [ ] Logs import/export works (NEW)
+- [ ] Queue screen shows commands (NEW)
+- [ ] Queue items update status correctly (NEW)
+- [ ] Queue import/export works (NEW)
+- [ ] Encryption works properly (NEW)
+- [ ] Data is unreadable when exported (NEW)
 - [ ] Import/Export works
 - [ ] App auto-starts on boot
 - [ ] Background tasks continue when app is minimized
@@ -239,10 +293,11 @@ Potential improvements for future versions:
 - SMS sending functionality
 - Command execution confirmation
 - Notification system for errors
-- Data encryption for sensitive settings
 - Multiple API endpoint profiles
-- Logging and debugging interface
 - Analytics and reporting
+- Log retention policies with automatic cleanup
+- Queue retry mechanism for failed commands
+- Export logs/queue in different formats (CSV, Excel)
 
 ## Success Metrics
 
