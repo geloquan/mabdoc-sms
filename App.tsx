@@ -11,6 +11,8 @@ import {
 } from 'react-native-safe-area-context';
 import DashboardScreen from './src/screens/DashboardScreen';
 import SettingsScreen from './src/screens/SettingsScreen';
+import LogViewerScreen from './src/screens/LogViewerScreen';
+import QueueViewerScreen from './src/screens/QueueViewerScreen';
 import BackgroundTaskService from './src/services/BackgroundTaskService';
 import SystemMonitorService from './src/services/SystemMonitorService';
 
@@ -25,7 +27,7 @@ function App() {
 
 function AppContent() {
   const safeAreaInsets = useSafeAreaInsets();
-  const [currentScreen, setCurrentScreen] = useState<'dashboard' | 'settings'>(
+  const [currentScreen, setCurrentScreen] = useState<'dashboard' | 'settings' | 'logs' | 'queue'>(
     'dashboard',
   );
 
@@ -47,22 +49,43 @@ function AppContent() {
     await BackgroundTaskService.start();
   };
 
+  const renderScreen = () => {
+    switch (currentScreen) {
+      case 'dashboard':
+        return (
+          <DashboardScreen
+            onNavigateToSettings={() => setCurrentScreen('settings')}
+            onNavigateToLogs={() => setCurrentScreen('logs')}
+            onNavigateToQueue={() => setCurrentScreen('queue')}
+          />
+        );
+      case 'settings':
+        return <SettingsScreen />;
+      case 'logs':
+        return <LogViewerScreen />;
+      case 'queue':
+        return <QueueViewerScreen />;
+      default:
+        return (
+          <DashboardScreen
+            onNavigateToSettings={() => setCurrentScreen('settings')}
+            onNavigateToLogs={() => setCurrentScreen('logs')}
+            onNavigateToQueue={() => setCurrentScreen('queue')}
+          />
+        );
+    }
+  };
+
   return (
     <View style={[styles.container, { paddingTop: safeAreaInsets.top }]}>
-      {currentScreen === 'dashboard' ? (
-        <DashboardScreen
-          onNavigateToSettings={() => setCurrentScreen('settings')}
-        />
-      ) : (
-        <View style={styles.container}>
-          <SettingsScreen />
-          <View style={styles.backButtonContainer}>
-            <TouchableOpacity
-              style={styles.backButton}
-              onPress={() => setCurrentScreen('dashboard')}>
-              <Text style={styles.backButtonText}>Back to Dashboard</Text>
-            </TouchableOpacity>
-          </View>
+      {renderScreen()}
+      {currentScreen !== 'dashboard' && (
+        <View style={styles.backButtonContainer}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => setCurrentScreen('dashboard')}>
+            <Text style={styles.backButtonText}>Back to Dashboard</Text>
+          </TouchableOpacity>
         </View>
       )}
     </View>

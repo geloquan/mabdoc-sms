@@ -9,6 +9,9 @@ export const DEFAULT_SETTINGS = {
 
 export const STORAGE_KEYS = {
   SETTINGS: '@app_settings',
+  LOGS: '@app_logs',
+  QUEUE: '@app_queue',
+  ENCRYPTION_KEY: '@app_encryption_key',
 };
 
 export const API_ENDPOINTS = {

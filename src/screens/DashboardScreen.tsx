@@ -12,10 +12,14 @@ import { SystemHealth } from '../types';
 
 interface DashboardScreenProps {
   onNavigateToSettings: () => void;
+  onNavigateToLogs: () => void;
+  onNavigateToQueue: () => void;
 }
 
 const DashboardScreen: React.FC<DashboardScreenProps> = ({
   onNavigateToSettings,
+  onNavigateToLogs,
+  onNavigateToQueue,
 }) => {
   const [health, setHealth] = useState<SystemHealth | null>(null);
   const [refreshing, setRefreshing] = useState(false);
@@ -63,11 +67,23 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({
       }>
       <View style={styles.header}>
         <Text style={styles.title}>SMS Sender Dashboard</Text>
-        <TouchableOpacity
-          style={styles.settingsButton}
-          onPress={onNavigateToSettings}>
-          <Text style={styles.settingsButtonText}>Settings</Text>
-        </TouchableOpacity>
+        <View style={styles.headerButtons}>
+          <TouchableOpacity
+            style={styles.settingsButton}
+            onPress={onNavigateToLogs}>
+            <Text style={styles.settingsButtonText}>Logs</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.settingsButton}
+            onPress={onNavigateToQueue}>
+            <Text style={styles.settingsButtonText}>Queue</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.settingsButton}
+            onPress={onNavigateToSettings}>
+            <Text style={styles.settingsButtonText}>Settings</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       <View style={styles.content}>
@@ -138,13 +154,18 @@ const styles = StyleSheet.create({
     borderBottomColor: '#e0e0e0',
   },
   title: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#333',
+    flex: 1,
+  },
+  headerButtons: {
+    flexDirection: 'row',
+    gap: 8,
   },
   settingsButton: {
     backgroundColor: '#007AFF',
-    paddingHorizontal: 15,
+    paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 6,
   },
