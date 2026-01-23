@@ -1,3 +1,74 @@
+# mabdoc-sms
+
+## SMS Sender Application
+
+A React Native Android application for automated SMS sending with system monitoring and health reporting capabilities.
+
+### Quick Start
+
+```bash
+npm install
+npm run android
+```
+
+### Features
+
+- 📱 **System Monitoring**: Battery, RAM, Network connectivity
+- 🔄 **Automated API Calls**: Periodic health reporting and command fetching
+- ⚙️ **Configurable Settings**: Adjustable intervals and API endpoints
+- 🔐 **Secure Authentication**: Basic authentication support
+- 📤 **Import/Export**: JSON-based settings management
+- 🚀 **Auto-Start**: Launches automatically on device boot
+
+### Documentation
+
+See [DOCUMENTATION.md](./DOCUMENTATION.md) for comprehensive documentation including:
+- Detailed feature descriptions
+- API endpoint specifications
+- Configuration guide
+- Architecture overview
+- Troubleshooting tips
+
+### Example Configuration
+
+See [settings-example.json](./settings-example.json) for a sample configuration file.
+
+### Required Permissions
+
+- SMS (send/receive)
+- Internet access
+- Network state monitoring
+- Battery monitoring
+- Boot receiver (auto-start)
+
+### Development
+
+```bash
+# Lint
+npm run lint
+
+# Type check
+npx tsc --noEmit
+
+# Run on Android
+npm run android
+
+# Run on iOS
+npm run ios
+```
+
+### API Endpoints
+
+The application communicates with three main endpoints:
+
+1. `GET /api/sms/machine` - Fetch SMS data
+2. `POST /api/sms/machine/health` - Send system health data
+3. `GET /api/sms/machine/command` - Fetch remote commands
+
+All endpoints use Basic Authentication.
+
+---
+
 This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
 
 # Getting Started

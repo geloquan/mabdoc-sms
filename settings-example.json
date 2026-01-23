@@ -1,0 +1,8 @@
+{
+  "apiUrl": "https://api.example.com",
+  "username": "demo-user",
+  "password": "demo-password",
+  "smsInterval": 60,
+  "healthInterval": 120,
+  "commandInterval": 60
+}
