@@ -1,7 +1,7 @@
 export const DEFAULT_SETTINGS = {
   apiUrl: '',
   username: '',
-  password: '',
+password: '',
   smsInterval: 60,
   healthInterval: 120,
   commandInterval: 60,
@@ -15,7 +15,7 @@ export const STORAGE_KEYS = {
 };
 
 export const API_ENDPOINTS = {
-  SMS: '/api/sms/machine',
+  SMS: '/api/sms/machine/queue/jobs/claim',
   HEALTH: '/api/sms/machine/health',
   COMMAND: '/api/sms/machine/command',
 };

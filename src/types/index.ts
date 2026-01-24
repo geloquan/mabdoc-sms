@@ -7,6 +7,22 @@ export interface AppSettings {
   commandInterval: number; // in seconds
 }
 
+export type SmsPayload = {
+  phone_number: string;
+  message: string;
+};
+
+export type SmsJob = {
+  id: number;
+  job_type: "sms";
+  payload: SmsPayload;
+  priority: number;
+  attempts: number;
+  max_attempts: number;
+  worker_id: number | null;
+  locked_at: string | null;
+  reserved_at: string | null;
+};
 export interface SystemHealth {
   batteryLevel: number;
   batteryCharging: boolean;
