@@ -195,7 +195,6 @@ class ApiService {
     health: SystemHealth,
   ): Promise<ApiResponse> {
     const startTime = Date.now();
-    const headers = await this.getHeaders(settings);
     const logEntry: LogEntry = {
       id: this.generateId(),
       endpoint: API_ENDPOINTS.HEALTH,
@@ -203,7 +202,7 @@ class ApiService {
       type: 'health',
       request: {
         method: 'POST',
-        headers: headers,
+        headers: {}, // Will be populated after the request
         body: health,
       },
       metadata: {

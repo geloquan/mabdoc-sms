@@ -10,7 +10,7 @@ jest.mock('../src/services/AuthService', () => ({
 }));
 
 // Mock fetch
-global.fetch = jest.fn();
+(global as any).fetch = jest.fn();
 
 // Mock other dependencies
 jest.mock('../src/services/LogStorageService', () => ({
@@ -57,7 +57,7 @@ describe('ApiService - Bearer Token Authentication', () => {
         timestamp: Date.now(),
       };
 
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
+      ((global as any).fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
         status: 200,
         json: async () => ({success: true}),
@@ -65,7 +65,7 @@ describe('ApiService - Bearer Token Authentication', () => {
 
       await ApiService.sendHealthData(mockSettings, mockHealthData);
 
-      expect(global.fetch).toHaveBeenCalledWith(
+      expect((global as any).fetch).toHaveBeenCalledWith(
         expect.any(String),
         expect.objectContaining({
           headers: expect.objectContaining({
@@ -88,7 +88,7 @@ describe('ApiService - Bearer Token Authentication', () => {
         timestamp: Date.now(),
       };
 
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
+      ((global as any).fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
         status: 200,
         json: async () => ({success: true}),
@@ -96,7 +96,7 @@ describe('ApiService - Bearer Token Authentication', () => {
 
       await ApiService.sendHealthData(mockSettings, mockHealthData);
 
-      expect(global.fetch).toHaveBeenCalledWith(
+      expect((global as any).fetch).toHaveBeenCalledWith(
         expect.any(String),
         expect.objectContaining({
           headers: expect.objectContaining({
@@ -133,7 +133,7 @@ describe('ApiService - Bearer Token Authentication', () => {
       };
 
       // First request returns 401, second request succeeds
-      (global.fetch as jest.Mock)
+      ((global as any).fetch as jest.Mock)
         .mockResolvedValueOnce({
           ok: false,
           status: 401,
@@ -149,7 +149,7 @@ describe('ApiService - Bearer Token Authentication', () => {
 
       expect(result.success).toBe(true);
       expect(AuthService.authenticate).toHaveBeenCalledWith(mockSettings);
-      expect(global.fetch).toHaveBeenCalledTimes(2);
+      expect((global as any).fetch).toHaveBeenCalledTimes(2);
     });
 
     it('should fail if reauthentication fails', async () => {
@@ -169,7 +169,7 @@ describe('ApiService - Bearer Token Authentication', () => {
         timestamp: Date.now(),
       };
 
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
+      ((global as any).fetch as jest.Mock).mockResolvedValueOnce({
         ok: false,
         status: 401,
         json: async () => ({error: 'Unauthorized'}),

@@ -85,7 +85,7 @@ class AuthService {
 
       const authToken: AuthToken = JSON.parse(tokenData);
 
-      // Check if token is expired
+      // Check if token is expired (expiresAt should be in milliseconds, same as Date.now())
       if (authToken.expiresAt && authToken.expiresAt < Date.now()) {
         await this.clearToken();
         return null;

@@ -10,7 +10,7 @@ jest.mock('@react-native-async-storage/async-storage', () => ({
 }));
 
 // Mock fetch
-global.fetch = jest.fn();
+(global as any).fetch = jest.fn();
 
 describe('AuthService', () => {
   beforeEach(() => {
@@ -29,7 +29,7 @@ describe('AuthService', () => {
         commandInterval: 60,
       };
 
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
+      ((global as any).fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
         status: 200,
         json: async () => ({token: mockToken}),
@@ -57,7 +57,7 @@ describe('AuthService', () => {
         commandInterval: 60,
       };
 
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
+      ((global as any).fetch as jest.Mock).mockResolvedValueOnce({
         ok: false,
         status: 401,
       });
@@ -78,7 +78,7 @@ describe('AuthService', () => {
         commandInterval: 60,
       };
 
-      (global.fetch as jest.Mock).mockRejectedValueOnce(new Error('Network error'));
+      ((global as any).fetch as jest.Mock).mockRejectedValueOnce(new Error('Network error'));
 
       const result = await AuthService.authenticate(mockSettings);
 
