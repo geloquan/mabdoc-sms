@@ -5,9 +5,12 @@ import CommandExecutor from '../utils/CommandExecutor';
 
 class BackgroundTaskService {
   private isRunning = false;
-  private smsIntervalId: ReturnType<typeof setInterval> | null = null;
-  private healthIntervalId: ReturnType<typeof setInterval> | null = null;
-  private commandIntervalId: ReturnType<typeof setInterval> | null = null;
+  private smsTimeoutId: ReturnType<typeof setTimeout> | null = null;
+  private healthTimeoutId: ReturnType<typeof setTimeout> | null = null;
+  private commandTimeoutId: ReturnType<typeof setTimeout> | null = null;
+  private isSmsRequestInProgress = false;
+  private isHealthRequestInProgress = false;
+  private isCommandRequestInProgress = false;
 
   async start(): Promise<void> {
     if (this.isRunning) {
@@ -18,8 +21,18 @@ class BackgroundTaskService {
     this.isRunning = true;
     const settings = await SettingsService.getSettings();
 
-    // Start SMS data fetching interval
-    this.smsIntervalId = setInterval(async () => {
+    // Start SMS data fetching with cooldown-based approach
+    const scheduleSmsTask = async () => {
+      if (!this.isRunning) return;
+
+      // Skip if a request is already in progress
+      if (this.isSmsRequestInProgress) {
+        console.log('SMS request already in progress, skipping this cycle');
+        this.smsTimeoutId = setTimeout(scheduleSmsTask, settings.smsInterval * 1000);
+        return;
+      }
+
+      this.isSmsRequestInProgress = true;
       try {
         const currentSettings = await SettingsService.getSettings();
         const response = await ApiService.fetchSmsData(currentSettings);
@@ -27,12 +40,28 @@ class BackgroundTaskService {
           console.log('SMS data fetched successfully:', response.data);
         }
       } catch (error) {
-        console.error('Error in SMS interval:', error);
+        console.error('Error in SMS task:', error);
+      } finally {
+        this.isSmsRequestInProgress = false;
+        // Schedule next execution after the request completes (cooldown)
+        if (this.isRunning) {
+          this.smsTimeoutId = setTimeout(scheduleSmsTask, settings.smsInterval * 1000);
+        }
       }
-    }, settings.smsInterval * 1000);
+    };
 
-    // Start health data posting interval
-    this.healthIntervalId = setInterval(async () => {
+    // Start health data posting with cooldown-based approach
+    const scheduleHealthTask = async () => {
+      if (!this.isRunning) return;
+
+      // Skip if a request is already in progress
+      if (this.isHealthRequestInProgress) {
+        console.log('Health request already in progress, skipping this cycle');
+        this.healthTimeoutId = setTimeout(scheduleHealthTask, settings.healthInterval * 1000);
+        return;
+      }
+
+      this.isHealthRequestInProgress = true;
       try {
         const currentSettings = await SettingsService.getSettings();
         const health = await SystemMonitorService.getSystemHealth();
@@ -41,12 +70,28 @@ class BackgroundTaskService {
           console.log('Health data sent successfully');
         }
       } catch (error) {
-        console.error('Error in health interval:', error);
+        console.error('Error in health task:', error);
+      } finally {
+        this.isHealthRequestInProgress = false;
+        // Schedule next execution after the request completes (cooldown)
+        if (this.isRunning) {
+          this.healthTimeoutId = setTimeout(scheduleHealthTask, settings.healthInterval * 1000);
+        }
       }
-    }, settings.healthInterval * 1000);
+    };
 
-    // Start command fetching interval
-    this.commandIntervalId = setInterval(async () => {
+    // Start command fetching with cooldown-based approach
+    const scheduleCommandTask = async () => {
+      if (!this.isRunning) return;
+
+      // Skip if a request is already in progress
+      if (this.isCommandRequestInProgress) {
+        console.log('Command request already in progress, skipping this cycle');
+        this.commandTimeoutId = setTimeout(scheduleCommandTask, settings.commandInterval * 1000);
+        return;
+      }
+
+      this.isCommandRequestInProgress = true;
       try {
         const currentSettings = await SettingsService.getSettings();
         const response = await ApiService.fetchCommands(currentSettings);
@@ -54,11 +99,22 @@ class BackgroundTaskService {
           await CommandExecutor.executeCommand(response.data);
         }
       } catch (error) {
-        console.error('Error in command interval:', error);
+        console.error('Error in command task:', error);
+      } finally {
+        this.isCommandRequestInProgress = false;
+        // Schedule next execution after the request completes (cooldown)
+        if (this.isRunning) {
+          this.commandTimeoutId = setTimeout(scheduleCommandTask, settings.commandInterval * 1000);
+        }
       }
-    }, settings.commandInterval * 1000);
+    };
 
-    console.log('Background tasks started');
+    // Start all tasks
+    scheduleSmsTask();
+    scheduleHealthTask();
+    scheduleCommandTask();
+
+    console.log('Background tasks started with cooldown-based intervals');
   }
 
   async stop(): Promise<void> {
@@ -67,19 +123,19 @@ class BackgroundTaskService {
       return;
     }
 
-    if (this.smsIntervalId) {
-      clearInterval(this.smsIntervalId);
-      this.smsIntervalId = null;
+    if (this.smsTimeoutId) {
+      clearTimeout(this.smsTimeoutId);
+      this.smsTimeoutId = null;
     }
 
-    if (this.healthIntervalId) {
-      clearInterval(this.healthIntervalId);
-      this.healthIntervalId = null;
+    if (this.healthTimeoutId) {
+      clearTimeout(this.healthTimeoutId);
+      this.healthTimeoutId = null;
     }
 
-    if (this.commandIntervalId) {
-      clearInterval(this.commandIntervalId);
-      this.commandIntervalId = null;
+    if (this.commandTimeoutId) {
+      clearTimeout(this.commandTimeoutId);
+      this.commandTimeoutId = null;
     }
 
     this.isRunning = false;

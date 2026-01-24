@@ -12,7 +12,15 @@ interface AuthResult {
 }
 
 class AuthService {
+  private authenticationPromise: Promise<AuthResult> | null = null;
+
   async authenticate(settings: AppSettings): Promise<AuthResult> {
+    // If an authentication is already in progress, return the existing promise
+    if (this.authenticationPromise) {
+      //console.log('🔄 Authentication already in progress, returning existing promise');
+      return this.authenticationPromise;
+    }
+
     //console.log('🔐 ===== AUTHENTICATION START =====');
     //console.log('👤 Username:', settings.username);
     //console.log('🌐 API URL:', settings.apiUrl);
@@ -21,6 +29,19 @@ class AuthService {
     const fullUrl = `${settings.apiUrl}${API_ENDPOINTS.AUTH}`;
     //console.log('📍 Full URL:', fullUrl);
 
+    // Create and store the authentication promise
+    this.authenticationPromise = this.performAuthentication(fullUrl, settings);
+
+    try {
+      const result = await this.authenticationPromise;
+      return result;
+    } finally {
+      // Clear the promise after completion (success or failure)
+      this.authenticationPromise = null;
+    }
+  }
+
+  private async performAuthentication(fullUrl: string, settings: AppSettings): Promise<AuthResult> {
     try {
       // Encode credentials for Basic Auth
       const credentials = encode(`${settings.username}:${settings.password}`);
