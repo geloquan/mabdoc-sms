@@ -1,6 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import AuthService from '../src/services/AuthService';
-import {STORAGE_KEYS} from '../src/config/constants';
 
 jest.mock('@react-native-async-storage/async-storage', () => ({
   setItem: jest.fn(),

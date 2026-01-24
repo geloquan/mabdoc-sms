@@ -83,7 +83,7 @@ class AuthService {
             success: false,
             error: errorData.message || `HTTP ${response.status}: ${response.statusText}`,
           };
-        } catch (parseError) {
+        } catch {
           //console.error('❌ Response is not JSON, likely HTML error page');
           //console.error('❌ First 200 chars:', responseText.substring(0, 200));
           return {
@@ -103,7 +103,7 @@ class AuthService {
         }
         //console.log('✅ Response parsed successfully');
         //console.log('📦 Response data:', JSON.stringify(data, null, 2));
-      } catch (parseError) {
+      } catch {
         //console.error('❌ Failed to parse successful response as JSON');
         //console.error('❌ Parse error:', parseError);
         //console.error('❌ Response text:', responseText);
@@ -159,9 +159,9 @@ class AuthService {
       //console.log('💾 Saving token to AsyncStorage...');
       await AsyncStorage.setItem(TOKEN_KEY, token);
       //console.log('✅ Token saved to AsyncStorage');
-    } catch (error) {
+    } catch {
       //console.error('❌ Failed to save token:', error);
-      throw error;
+      throw new Error('Failed to save token');
     }
   }
 
@@ -174,7 +174,7 @@ class AuthService {
         //console.log('ℹ️ No token found in storage');
       }
       return token;
-    } catch (error) {
+    } catch {
       //console.error('❌ Failed to get token:', error);
       return null;
     }
@@ -185,7 +185,7 @@ class AuthService {
       //console.log('🗑️ Clearing token from storage...');
       await AsyncStorage.removeItem(TOKEN_KEY);
       //console.log('✅ Token cleared');
-    } catch (error) {
+    } catch {
       //console.error('❌ Failed to clear token:', error);
     }
   }
