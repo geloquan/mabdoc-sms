@@ -18,6 +18,7 @@ import BackgroundTaskService from './src/services/BackgroundTaskService';
 import SystemMonitorService from './src/services/SystemMonitorService';
 import AuthService from "./src/services/AuthService.ts";
 import SettingsService from "./src/services/SettingsService.ts";
+import InitializationService from "./src/services/InitializationService";
 
 function App() {
   return (
@@ -45,6 +46,9 @@ function AppContent() {
   }, []);
 
   const initializeApp = async () => {
+    // Initialize the app (load stored data, execute pending queue, populate dummy data)
+    await InitializationService.initialize();
+
     // Login
     await AuthService.login();
 
