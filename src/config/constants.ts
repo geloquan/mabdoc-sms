@@ -13,6 +13,8 @@ export const STORAGE_KEYS = {
   QUEUE: '@app_queue',
   ENCRYPTION_KEY: '@app_encryption_key',
   AUTH_TOKEN: '@app_auth_token',
+  SMS_RESPONSES: '@app_sms_responses',
+  SMS_FETCHING_STATE: '@app_sms_fetching_state',
 };
 
 export const API_ENDPOINTS = {

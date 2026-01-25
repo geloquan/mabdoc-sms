@@ -32,8 +32,18 @@ const SettingsScreen: React.FC = () => {
   const handleSave = async () => {
     const success = await SettingsService.saveSettings(settings);
     if (success) {
-      Alert.alert('Success', 'Settings saved successfully');
-      await BackgroundTaskService.restart();
+      Alert.alert(
+        'Settings Saved',
+        'Settings have been saved successfully. The app will now restart background services to apply the new configuration.',
+        [
+          {
+            text: 'OK',
+            onPress: async () => {
+              await BackgroundTaskService.restart();
+            },
+          },
+        ],
+      );
     } else {
       Alert.alert('Error', 'Failed to save settings');
     }

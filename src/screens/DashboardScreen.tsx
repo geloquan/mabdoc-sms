@@ -6,40 +6,105 @@ import {
   ScrollView,
   TouchableOpacity,
   RefreshControl,
+  Alert,
 } from 'react-native';
 import SystemMonitorService from '../services/SystemMonitorService';
 import ConfigurationPanel from '../components/ConfigurationPanel';
-import { SystemHealth } from '../types';
+import SmsFetchingService from '../services/SmsFetchingService';
+import AuthService from '../services/AuthService';
+import SettingsService from '../services/SettingsService';
+import { SystemHealth, SmsFetchingState } from '../types';
 
 interface DashboardScreenProps {
   onNavigateToSettings: () => void;
   onNavigateToLogs: () => void;
   onNavigateToQueue: () => void;
+  onNavigateToSmsResponses: () => void;
 }
 
 const DashboardScreen: React.FC<DashboardScreenProps> = ({
   onNavigateToSettings,
   onNavigateToLogs,
   onNavigateToQueue,
+  onNavigateToSmsResponses,
 }) => {
   const [health, setHealth] = useState<SystemHealth | null>(null);
+  const [fetchingState, setFetchingState] = useState<SmsFetchingState | null>(null);
   const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
-    loadHealth();
-    const interval = setInterval(loadHealth, 5000); // Update every 5 seconds
+    loadData();
+    const interval = setInterval(loadData, 5000); // Update every 5 seconds
     return () => clearInterval(interval);
   }, []);
 
-  const loadHealth = async () => {
+  const loadData = async () => {
     const healthData = await SystemMonitorService.getSystemHealth();
+    const state = SmsFetchingService.getState();
     setHealth(healthData);
+    setFetchingState(state);
   };
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await loadHealth();
+    await loadData();
     setRefreshing(false);
+  };
+
+  const handlePauseResume = async () => {
+    if (!fetchingState) return;
+
+    if (fetchingState.isPaused) {
+      // Resuming - requires authentication
+      Alert.alert(
+        'Resume SMS Fetching',
+        'Authentication required to resume SMS fetching. Please confirm.',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Confirm',
+            onPress: async () => {
+              try {
+                const settings = await SettingsService.getSettings();
+                const authCheck = await AuthService.checkAuthentication(settings);
+                
+                if (authCheck.success) {
+                  await SmsFetchingService.resume();
+                  await loadData();
+                  Alert.alert('Success', 'SMS fetching resumed');
+                } else {
+                  Alert.alert('Authentication Failed', 'Could not verify credentials. Please check your settings.');
+                }
+              } catch (error) {
+                Alert.alert('Error', 'Failed to resume SMS fetching');
+              }
+            },
+          },
+        ],
+      );
+    } else {
+      // Pausing - no authentication required
+      Alert.alert(
+        'Pause SMS Fetching',
+        'Are you sure you want to pause SMS fetching?',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Pause',
+            style: 'destructive',
+            onPress: async () => {
+              try {
+                await SmsFetchingService.pause();
+                await loadData();
+                Alert.alert('Success', 'SMS fetching paused');
+              } catch (error) {
+                Alert.alert('Error', 'Failed to pause SMS fetching');
+              }
+            },
+          },
+        ],
+      );
+    }
   };
 
   const renderHealthItem = (label: string, value: string, status?: string) => (
@@ -74,6 +139,12 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({
         <View style={styles.headerButtons}>
           <TouchableOpacity
             style={styles.navButton}
+            onPress={onNavigateToSmsResponses}>
+            <Text style={styles.navButtonIcon}>📨</Text>
+            <Text style={styles.navButtonText}>SMS</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.navButton}
             onPress={onNavigateToLogs}>
             <Text style={styles.navButtonIcon}>📄</Text>
             <Text style={styles.navButtonText}>Logs</Text>
@@ -95,6 +166,39 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({
 
       {/* Configuration Panel - Collapsed by default */}
       <ConfigurationPanel collapsed={true} />
+
+      {/* SMS Fetching Control */}
+      {fetchingState && (
+        <View style={styles.controlSection}>
+          <Text style={styles.sectionTitle}>📡 SMS Fetching Control</Text>
+          <View style={styles.controlCard}>
+            <View style={styles.controlInfo}>
+              <Text style={styles.controlLabel}>Status:</Text>
+              <Text style={[
+                styles.controlStatus,
+                fetchingState.isPaused ? styles.controlStatusPaused : styles.controlStatusActive
+              ]}>
+                {fetchingState.isPaused ? '⏸️ PAUSED' : '▶️ ACTIVE'}
+              </Text>
+            </View>
+            <View style={styles.controlStats}>
+              <Text style={styles.controlStatText}>Fetched: {fetchingState.totalFetched}</Text>
+              <Text style={styles.controlStatText}>Success: {fetchingState.totalSuccess}</Text>
+              <Text style={styles.controlStatText}>Failed: {fetchingState.totalFailed}</Text>
+            </View>
+            <TouchableOpacity
+              style={[
+                styles.controlButton,
+                fetchingState.isPaused ? styles.controlButtonResume : styles.controlButtonPause
+              ]}
+              onPress={handlePauseResume}>
+              <Text style={styles.controlButtonText}>
+                {fetchingState.isPaused ? '▶️ Resume' : '⏸️ Pause'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
 
       <View style={styles.content}>
         <Text style={styles.sectionTitle}>💚 System Health</Text>
@@ -205,6 +309,67 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 12,
     fontWeight: '600',
+  },
+  controlSection: {
+    padding: 20,
+    backgroundColor: '#fff',
+    marginTop: 10,
+  },
+  controlCard: {
+    backgroundColor: '#f8f9fa',
+    borderRadius: 10,
+    padding: 16,
+    borderLeftWidth: 4,
+    borderLeftColor: '#2196F3',
+  },
+  controlInfo: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  controlLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#666',
+  },
+  controlStatus: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  controlStatusActive: {
+    color: '#4CAF50',
+  },
+  controlStatusPaused: {
+    color: '#FF9800',
+  },
+  controlStats: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginBottom: 12,
+    paddingVertical: 8,
+    backgroundColor: '#fff',
+    borderRadius: 6,
+  },
+  controlStatText: {
+    fontSize: 12,
+    color: '#666',
+  },
+  controlButton: {
+    padding: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  controlButtonPause: {
+    backgroundColor: '#FF9800',
+  },
+  controlButtonResume: {
+    backgroundColor: '#4CAF50',
+  },
+  controlButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: 'bold',
   },
   content: {
     padding: 20,

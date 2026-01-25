@@ -74,3 +74,30 @@ export interface QueueEntry {
     [key: string]: any;
   };
 }
+
+export interface SmsResponse {
+  id: string;
+  timestamp: number;
+  jobId?: number;
+  phoneNumber?: string;
+  message?: string;
+  status: 'success' | 'failed' | 'no_job';
+  error?: string;
+  metadata: {
+    attempts?: number;
+    priority?: number;
+    duration?: number;
+    batteryLevel?: number;
+    networkType?: string;
+    [key: string]: any;
+  };
+}
+
+export interface SmsFetchingState {
+  isPaused: boolean;
+  lastFetchTimestamp?: number;
+  lastPauseTimestamp?: number;
+  totalFetched: number;
+  totalSuccess: number;
+  totalFailed: number;
+}

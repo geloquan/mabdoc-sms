@@ -13,6 +13,7 @@ import DashboardScreen from './src/screens/DashboardScreen';
 import SettingsScreen from './src/screens/SettingsScreen';
 import LogViewerScreen from './src/screens/LogViewerScreen';
 import QueueViewerScreen from './src/screens/QueueViewerScreen';
+import SmsResponseViewerScreen from './src/screens/SmsResponseViewerScreen';
 import BackgroundTaskService from './src/services/BackgroundTaskService';
 import SystemMonitorService from './src/services/SystemMonitorService';
 import AuthService from "./src/services/AuthService.ts";
@@ -29,7 +30,7 @@ function App() {
 
 function AppContent() {
   const safeAreaInsets = useSafeAreaInsets();
-  const [currentScreen, setCurrentScreen] = useState<'dashboard' | 'settings' | 'logs' | 'queue'>(
+  const [currentScreen, setCurrentScreen] = useState<'dashboard' | 'settings' | 'logs' | 'queue' | 'sms-responses'>(
     'dashboard',
   );
 
@@ -62,6 +63,7 @@ function AppContent() {
             onNavigateToSettings={() => setCurrentScreen('settings')}
             onNavigateToLogs={() => setCurrentScreen('logs')}
             onNavigateToQueue={() => setCurrentScreen('queue')}
+            onNavigateToSmsResponses={() => setCurrentScreen('sms-responses')}
           />
         );
       case 'settings':
@@ -70,12 +72,15 @@ function AppContent() {
         return <LogViewerScreen />;
       case 'queue':
         return <QueueViewerScreen />;
+      case 'sms-responses':
+        return <SmsResponseViewerScreen />;
       default:
         return (
           <DashboardScreen
             onNavigateToSettings={() => setCurrentScreen('settings')}
             onNavigateToLogs={() => setCurrentScreen('logs')}
             onNavigateToQueue={() => setCurrentScreen('queue')}
+            onNavigateToSmsResponses={() => setCurrentScreen('sms-responses')}
           />
         );
     }

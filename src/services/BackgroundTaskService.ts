@@ -2,6 +2,7 @@ import SettingsService from './SettingsService';
 import ApiService from './ApiService';
 import SystemMonitorService from './SystemMonitorService';
 import CommandExecutor from '../utils/CommandExecutor';
+import SmsFetchingService from './SmsFetchingService';
 
 class BackgroundTaskService {
   private isRunning = false;
@@ -17,6 +18,9 @@ class BackgroundTaskService {
       console.log('Background tasks already running');
       return;
     }
+
+    // Initialize SMS Fetching Service
+    await SmsFetchingService.initialize();
 
     this.isRunning = true;
     const settings = await SettingsService.getSettings();
@@ -35,9 +39,16 @@ class BackgroundTaskService {
       this.isSmsRequestInProgress = true;
       try {
         const currentSettings = await SettingsService.getSettings();
-        const response = await ApiService.fetchSmsData(currentSettings);
-        if (response.success) {
-          console.log('SMS data fetched successfully:', response.data);
+        
+        // Use centralized SmsFetchingService
+        const response = await SmsFetchingService.fetchAndProcessSms(currentSettings);
+        
+        if (response.status === 'success') {
+          console.log('SMS data fetched and processed successfully');
+        } else if (response.status === 'no_job') {
+          console.log('No SMS job available');
+        } else {
+          console.error('SMS fetch failed:', response.error);
         }
       } catch (error) {
         console.error('Error in SMS task:', error);
