@@ -212,4 +212,123 @@ describe('AuthService', () => {
       expect(AsyncStorage.removeItem).toHaveBeenCalledWith('@auth_token');
     });
   });
+
+  describe('checkAuthentication', () => {
+    const mockSettings = {
+      apiUrl: 'https://api.example.com',
+      username: 'testuser',
+      password: 'testpass',
+      smsInterval: 60,
+      healthInterval: 120,
+      commandInterval: 60,
+    };
+
+    it('should successfully check authentication with valid token', async () => {
+      const mockToken = 'valid-token-123';
+      const mockMeResponse = {
+        id: 1,
+        username: 'testuser',
+      };
+
+      (AsyncStorage.getItem as jest.Mock).mockResolvedValueOnce(mockToken);
+
+      ((global as any).fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => mockMeResponse,
+      });
+
+      const result = await AuthService.checkAuthentication(mockSettings);
+
+      expect(result.success).toBe(true);
+      expect(result.data).toEqual(mockMeResponse);
+      expect((global as any).fetch).toHaveBeenCalledWith(
+        'https://api.example.com/api/sms/machine/me',
+        expect.objectContaining({
+          method: 'GET',
+          headers: expect.objectContaining({
+            Authorization: `Bearer ${mockToken}`,
+          }),
+        }),
+      );
+    });
+
+    it('should fail when no token is available', async () => {
+      (AsyncStorage.getItem as jest.Mock).mockResolvedValueOnce(null);
+
+      const result = await AuthService.checkAuthentication(mockSettings);
+
+      expect(result.success).toBe(false);
+      expect(result.error).toBe('No token available');
+      expect((global as any).fetch).not.toHaveBeenCalled();
+    });
+
+    it('should clear token and fail on 401 response', async () => {
+      const mockToken = 'expired-token-123';
+
+      (AsyncStorage.getItem as jest.Mock).mockResolvedValueOnce(mockToken);
+      (AsyncStorage.removeItem as jest.Mock).mockResolvedValueOnce(undefined);
+
+      ((global as any).fetch as jest.Mock).mockResolvedValueOnce({
+        ok: false,
+        status: 401,
+        statusText: 'Unauthorized',
+      });
+
+      const result = await AuthService.checkAuthentication(mockSettings);
+
+      expect(result.success).toBe(false);
+      expect(result.error).toBe('Authentication expired');
+      expect(AsyncStorage.removeItem).toHaveBeenCalledWith('@auth_token');
+    });
+
+    it('should handle server errors', async () => {
+      const mockToken = 'valid-token-123';
+
+      (AsyncStorage.getItem as jest.Mock).mockResolvedValueOnce(mockToken);
+
+      ((global as any).fetch as jest.Mock).mockResolvedValueOnce({
+        ok: false,
+        status: 500,
+        statusText: 'Internal Server Error',
+      });
+
+      const result = await AuthService.checkAuthentication(mockSettings);
+
+      expect(result.success).toBe(false);
+      expect(result.error).toContain('HTTP 500');
+    });
+
+    it('should handle invalid response data', async () => {
+      const mockToken = 'valid-token-123';
+
+      (AsyncStorage.getItem as jest.Mock).mockResolvedValueOnce(mockToken);
+
+      ((global as any).fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({invalid: 'data'}),
+      });
+
+      const result = await AuthService.checkAuthentication(mockSettings);
+
+      expect(result.success).toBe(false);
+      expect(result.error).toBe('Invalid response from server');
+    });
+
+    it('should handle network errors', async () => {
+      const mockToken = 'valid-token-123';
+
+      (AsyncStorage.getItem as jest.Mock).mockResolvedValueOnce(mockToken);
+
+      ((global as any).fetch as jest.Mock).mockRejectedValueOnce(
+        new TypeError('Network request failed')
+      );
+
+      const result = await AuthService.checkAuthentication(mockSettings);
+
+      expect(result.success).toBe(false);
+      expect(result.error).toContain('Network request failed');
+    });
+  });
 });

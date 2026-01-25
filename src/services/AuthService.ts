@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {AppSettings} from '../types';
+import {AppSettings, MeResponse} from '../types';
 import {API_ENDPOINTS} from '../config/constants';
 import {encode} from 'base-64';
 
@@ -8,6 +8,12 @@ const TOKEN_KEY = '@auth_token';
 interface AuthResult {
   success: boolean;
   token?: string;
+  error?: string;
+}
+
+interface AuthCheckResult {
+  success: boolean;
+  data?: MeResponse;
   error?: string;
 }
 
@@ -123,6 +129,74 @@ class AuthService {
       return token;
     } catch {
       return null;
+    }
+  }
+
+  async checkAuthentication(settings: AppSettings): Promise<AuthCheckResult> {
+    try {
+      const token = await this.getToken();
+      
+      if (!token) {
+        return {
+          success: false,
+          error: 'No token available',
+        };
+      }
+
+      const fullUrl = `${settings.apiUrl}${API_ENDPOINTS.ME}`;
+      
+      const response = await fetch(fullUrl, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          // Token is invalid or expired
+          await this.clearToken();
+          return {
+            success: false,
+            error: 'Authentication expired',
+          };
+        }
+        
+        return {
+          success: false,
+          error: `HTTP ${response.status}: ${response.statusText}`,
+        };
+      }
+
+      const data = await response.json();
+      
+      if (!data.id || !data.username) {
+        return {
+          success: false,
+          error: 'Invalid response from server',
+        };
+      }
+
+      return {
+        success: true,
+        data: {
+          id: data.id,
+          username: data.username,
+        },
+      };
+    } catch (error) {
+      if (error instanceof TypeError && error.message.includes('Network request failed')) {
+        return {
+          success: false,
+          error: 'Network request failed. Check API URL and internet connection.',
+        };
+      }
+
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      };
     }
   }
 

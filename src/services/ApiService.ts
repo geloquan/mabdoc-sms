@@ -24,9 +24,19 @@ class ApiService {
     const token = await AuthService.getToken();
 
     if (token) {
-      return true;
+      // Check if the token is still valid by calling /api/sms/machine/me
+      const authCheck = await AuthService.checkAuthentication(settings);
+      
+      if (authCheck.success) {
+        console.log('✅ Authentication check successful - user:', authCheck.data?.username);
+        return true;
+      }
+      
+      console.log('⚠️ Authentication check failed:', authCheck.error);
+      // Token is invalid or expired, need to re-authenticate
     }
 
+    // No token or token is invalid, authenticate
     const authResult = await AuthService.authenticate(settings);
 
     if (authResult.success) {

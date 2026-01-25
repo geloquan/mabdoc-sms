@@ -7,6 +7,11 @@ export interface AppSettings {
   commandInterval: number; // in seconds
 }
 
+export interface MeResponse {
+  id: number;
+  username: string;
+}
+
 export type SmsPayload = {
   phone_number: string;
   message: string;

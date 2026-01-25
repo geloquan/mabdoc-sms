@@ -20,4 +20,5 @@ export const API_ENDPOINTS = {
   HEALTH: '/api/sms/machine/health',
   COMMAND: '/api/sms/machine/command',
   AUTH: '/api/sms/machine/login',
+  ME: '/api/sms/machine/me',
 };
