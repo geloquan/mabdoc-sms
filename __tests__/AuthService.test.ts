@@ -316,6 +316,44 @@ describe('AuthService', () => {
       expect(result.error).toBe('Invalid response from server');
     });
 
+    it('should accept zero as a valid id', async () => {
+      const mockToken = 'valid-token-123';
+      const mockMeResponse = {
+        id: 0,
+        username: 'testuser',
+      };
+
+      (AsyncStorage.getItem as jest.Mock).mockResolvedValueOnce(mockToken);
+
+      ((global as any).fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => mockMeResponse,
+      });
+
+      const result = await AuthService.checkAuthentication(mockSettings);
+
+      expect(result.success).toBe(true);
+      expect(result.data).toEqual(mockMeResponse);
+    });
+
+    it('should reject empty username', async () => {
+      const mockToken = 'valid-token-123';
+
+      (AsyncStorage.getItem as jest.Mock).mockResolvedValueOnce(mockToken);
+
+      ((global as any).fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({id: 1, username: ''}),
+      });
+
+      const result = await AuthService.checkAuthentication(mockSettings);
+
+      expect(result.success).toBe(false);
+      expect(result.error).toBe('Invalid response from server');
+    });
+
     it('should handle network errors', async () => {
       const mockToken = 'valid-token-123';
 

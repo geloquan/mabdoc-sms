@@ -171,7 +171,7 @@ class AuthService {
 
       const data = await response.json();
       
-      if (!data.id || !data.username) {
+      if (typeof data.id !== 'number' || typeof data.username !== 'string' || !data.username) {
         return {
           success: false,
           error: 'Invalid response from server',
