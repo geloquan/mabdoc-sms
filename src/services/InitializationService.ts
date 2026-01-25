@@ -5,7 +5,6 @@ import SmsResponseStorageService from './SmsResponseStorageService';
 import CommandExecutor from '../utils/CommandExecutor';
 import { LogEntry, QueueEntry, SmsResponse } from '../types';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { STORAGE_KEYS } from '../config/constants';
 
 class InitializationService {
   private readonly DUMMY_DATA_KEY = '@app_dummy_data_initialized';

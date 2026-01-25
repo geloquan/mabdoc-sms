@@ -17,7 +17,6 @@ import SmsResponseViewerScreen from './src/screens/SmsResponseViewerScreen';
 import BackgroundTaskService from './src/services/BackgroundTaskService';
 import SystemMonitorService from './src/services/SystemMonitorService';
 import AuthService from "./src/services/AuthService.ts";
-import SettingsService from "./src/services/SettingsService.ts";
 import InitializationService from "./src/services/InitializationService";
 
 function App() {
