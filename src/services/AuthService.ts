@@ -169,7 +169,6 @@ class AuthService {
         },
       };
     } catch (error) {
-      console.error('❌ Error checking authentication checkAuthentication():', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown authentication error',
