@@ -20,16 +20,13 @@ class ApiService {
   private isReauthenticating = false;
 
   private async ensureAuthenticated(settings: AppSettings): Promise<boolean> {
-    console.log('🔐 Ensuring authentication...');
 
     const token = await AuthService.getToken();
 
     if (token) {
-      console.log('✅ Valid token found');
       return true;
     }
 
-    console.log('⚠️ No token found, attempting authentication...');
     const authResult = await AuthService.authenticate(settings);
 
     if (authResult.success) {
@@ -50,11 +47,9 @@ class ApiService {
     };
 
     if (token) {
-      // Use Bearer token authentication if available
       console.log('✅ Using Bearer token authentication');
       headers.Authorization = `Bearer ${token}`;
     } else {
-      // Fall back to Basic authentication
       console.log('⚠️ No token found, falling back to Basic authentication');
       const credentials = encode(
         `${settings.username}:${settings.password}`,
@@ -152,14 +147,12 @@ class ApiService {
     console.log('📥 Response status:', response.status);
     console.log('📥 Response ok:', response.ok);
 
-    // Handle token expiration
-    if (response.status === 401 && retryOn401) {
+    // if (response.status === 401 && retryOn401) {
+    if (false) {
       console.warn('⚠️ 401 Unauthorized - token expired, re-authenticating...');
 
-      // Clear old token
       await AuthService.clearToken();
 
-      // Get new token
       const authResult = await AuthService.authenticate(settings);
 
       if (!authResult.success || !authResult.token) {
@@ -169,7 +162,6 @@ class ApiService {
 
       console.log('✅ Re-authentication successful, retrying request...');
 
-      // Retry with new token
       const newHeaders = {
         'Authorization': `Bearer ${authResult.token}`,
         'Accept': 'application/json',
