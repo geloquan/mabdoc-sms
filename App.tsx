@@ -15,6 +15,8 @@ import LogViewerScreen from './src/screens/LogViewerScreen';
 import QueueViewerScreen from './src/screens/QueueViewerScreen';
 import BackgroundTaskService from './src/services/BackgroundTaskService';
 import SystemMonitorService from './src/services/SystemMonitorService';
+import AuthService from "./src/services/AuthService.ts";
+import SettingsService from "./src/services/SettingsService.ts";
 
 function App() {
   return (
@@ -42,6 +44,9 @@ function AppContent() {
   }, []);
 
   const initializeApp = async () => {
+    // Login
+    await AuthService.login();
+
     // Request necessary permissions
     await SystemMonitorService.requestSmsPermission();
 

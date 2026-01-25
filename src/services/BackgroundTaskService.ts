@@ -84,7 +84,6 @@ class BackgroundTaskService {
     const scheduleCommandTask = async () => {
       if (!this.isRunning) return;
 
-      // Skip if a request is already in progress
       if (this.isCommandRequestInProgress) {
         console.log('Command request already in progress, skipping this cycle');
         this.commandTimeoutId = setTimeout(scheduleCommandTask, settings.commandInterval * 1000);
@@ -109,10 +108,9 @@ class BackgroundTaskService {
       }
     };
 
-    // Start all tasks
     scheduleSmsTask();
-    scheduleHealthTask();
-    scheduleCommandTask();
+    // scheduleHealthTask();
+    // scheduleCommandTask();
 
     console.log('Background tasks started with cooldown-based intervals');
   }

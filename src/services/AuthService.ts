@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {AppSettings, MeResponse} from '../types';
 import {API_ENDPOINTS} from '../config/constants';
 import {encode} from 'base-64';
+import SettingsService from "./SettingsService.ts";
 
 const TOKEN_KEY = '@auth_token';
 
@@ -19,22 +20,6 @@ interface AuthCheckResult {
 
 class AuthService {
   private authenticationPromise: Promise<AuthResult> | null = null;
-
-  async authenticate(settings: AppSettings): Promise<AuthResult> {
-    if (this.authenticationPromise) {
-      return this.authenticationPromise;
-    }
-    const fullUrl = `${settings.apiUrl}${API_ENDPOINTS.AUTH}`;
-
-    this.authenticationPromise = this.performAuthentication(fullUrl, settings);
-
-    try {
-      const result = await this.authenticationPromise;
-      return result;
-    } finally {
-      this.authenticationPromise = null;
-    }
-  }
 
   private async performAuthentication(fullUrl: string, settings: AppSettings): Promise<AuthResult> {
     try {
@@ -120,12 +105,16 @@ class AuthService {
     }
   }
 
+  async clearToken(): Promise<void> {
+    try {
+      await AsyncStorage.removeItem(TOKEN_KEY);
+    } catch {
+    }
+  }
+
   async getToken(): Promise<string | null> {
     try {
       const token = await AsyncStorage.getItem(TOKEN_KEY);
-      if (token) {
-      } else {
-      }
       return token;
     } catch {
       return null;
@@ -133,9 +122,10 @@ class AuthService {
   }
 
   async checkAuthentication(settings: AppSettings): Promise<AuthCheckResult> {
+    console.log('🔒===== Checking authentication status =====');
+
     try {
       const token = await this.getToken();
-      
       if (!token) {
         return {
           success: false,
@@ -144,7 +134,7 @@ class AuthService {
       }
 
       const fullUrl = `${settings.apiUrl}${API_ENDPOINTS.ME}`;
-      
+
       const response = await fetch(fullUrl, {
         method: 'GET',
         headers: {
@@ -155,28 +145,21 @@ class AuthService {
 
       if (!response.ok) {
         if (response.status === 401) {
-          // Token is invalid or expired
+          console.warn('❌ Authentication failed: Invalid or expired token');
           await this.clearToken();
           return {
             success: false,
-            error: 'Authentication expired',
+            error: 'Invalid or expired token',
           };
         }
-        
-        return {
-          success: false,
-          error: `HTTP ${response.status}: ${response.statusText}`,
-        };
       }
 
-      const data = await response.json();
-      
-      if (typeof data.id !== 'number' || typeof data.username !== 'string' || !data.username) {
-        return {
-          success: false,
-          error: 'Invalid response from server',
-        };
-      }
+      const text = await response.text();
+      const cleanText = text.replace(/`/g, '').trim();
+
+      const data = JSON.parse(cleanText);
+
+      console.log('✅ Authentication valid for user:', data.username);
 
       return {
         success: true,
@@ -186,26 +169,61 @@ class AuthService {
         },
       };
     } catch (error) {
-      if (error instanceof TypeError && error.message.includes('Network request failed')) {
-        return {
-          success: false,
-          error: 'Network request failed. Check API URL and internet connection.',
-        };
-      }
-
+      console.error('❌ Error checking authentication checkAuthentication():', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : 'Unknown authentication error',
       };
     }
   }
 
-  async clearToken(): Promise<void> {
+  async login(): Promise<void> {
+    console.log('🔒===== Performing worker login =====');
+
     try {
-      await AsyncStorage.removeItem(TOKEN_KEY);
-    } catch {
+      const settings = await SettingsService.getSettings();
+
+      const fullUrl = `${settings.apiUrl}${API_ENDPOINTS.AUTH}`;
+
+      const response = await fetch(fullUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: settings.username,
+          password: settings.password,
+        }),
+      });
+
+      console.log('📥 Response status:', response.status);
+
+      if (!response.ok) {
+        throw new Error('Worker login failed');
+      }
+
+      const text = await response.text();
+
+      const cleanText = text.replace(/`/g, '').trim();
+
+      const data = JSON.parse(cleanText);
+
+      await this.saveToken(data.token);
+    } catch (error) {
+      console.error('❌ Worker login error:', error);
+
+      if (error instanceof SyntaxError) {
+        throw new Error('Invalid response format from server');
+      }
+
+      if (error instanceof TypeError && error.message.includes('Network request failed')) {
+        throw new Error('Network error. Check your internet connection and API URL.');
+      }
+
+      throw error;
     }
   }
+
 }
 
 export default new AuthService();
