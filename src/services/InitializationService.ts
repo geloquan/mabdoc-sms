@@ -19,11 +19,8 @@ class InitializationService {
     console.log('🚀 Initializing application...');
 
     try {
-      // Load data from secure storage
-      await this.loadStoredData();
-
-      // Execute pending queue entries
-      await this.executePendingQueueEntries();
+      // Load data from secure storage and execute pending queue entries
+      await this.loadAndExecutePendingQueue();
 
       // Populate dummy data on first launch
       await this.populateDummyDataIfNeeded();
@@ -35,9 +32,9 @@ class InitializationService {
   }
 
   /**
-   * Load all stored data from secure storage
+   * Load all stored data from secure storage and execute pending queue entries
    */
-  private async loadStoredData(): Promise<void> {
+  private async loadAndExecutePendingQueue(): Promise<void> {
     console.log('📂 Loading stored data...');
 
     const [logs, queue, smsResponses] = await Promise.all([
@@ -47,15 +44,17 @@ class InitializationService {
     ]);
 
     console.log(`📊 Loaded ${logs.length} logs, ${queue.length} queue entries, ${smsResponses.length} SMS responses`);
+
+    // Execute pending queue entries
+    await this.executePendingQueueEntries(queue);
   }
 
   /**
    * Execute pending queue entries on app start
    */
-  private async executePendingQueueEntries(): Promise<void> {
+  private async executePendingQueueEntries(queue: QueueEntry[]): Promise<void> {
     console.log('⚙️ Executing pending queue entries...');
 
-    const queue = await QueueStorageService.getQueue();
     const pendingEntries = queue.filter(entry => entry.status === 'pending');
 
     if (pendingEntries.length === 0) {

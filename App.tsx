@@ -16,8 +16,8 @@ import QueueViewerScreen from './src/screens/QueueViewerScreen';
 import SmsResponseViewerScreen from './src/screens/SmsResponseViewerScreen';
 import BackgroundTaskService from './src/services/BackgroundTaskService';
 import SystemMonitorService from './src/services/SystemMonitorService';
-import AuthService from "./src/services/AuthService.ts";
-import InitializationService from "./src/services/InitializationService";
+import AuthService from './src/services/AuthService';
+import InitializationService from './src/services/InitializationService';
 
 function App() {
   return (
