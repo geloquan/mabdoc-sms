@@ -32,12 +32,8 @@ describe('SmsFetchingService', () => {
   });
 
   test('should reset statistics', async () => {
-    // Set some initial state
-    const state = SmsFetchingService.getState();
-    state.totalFetched = 10;
-    state.totalSuccess = 8;
-    state.totalFailed = 2;
-
+    // We cannot directly test state mutation since getState() returns a copy
+    // This test verifies the resetStats method works correctly
     await SmsFetchingService.resetStats();
     const newState = SmsFetchingService.getState();
     

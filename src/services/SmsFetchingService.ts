@@ -85,7 +85,7 @@ class SmsFetchingService {
           duration: Date.now() - startTime,
         },
       };
-      // Don't save paused responses to storage
+      // Return early without saving when paused
       return response;
     }
 

@@ -205,7 +205,9 @@ const SmsResponseViewerScreen: React.FC = () => {
                   Priority: {response.metadata.priority}
                 </Text>
               )}
-              {response.metadata.batteryLevel !== undefined && (
+              {response.metadata.batteryLevel !== undefined && 
+               response.metadata.batteryLevel !== null &&
+               !isNaN(response.metadata.batteryLevel) && (
                 <Text style={styles.detailText}>
                   Battery: {response.metadata.batteryLevel.toFixed(1)}%
                 </Text>
