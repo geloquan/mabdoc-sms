@@ -1,12 +1,19 @@
-import 'react-native-get-random-values';
-
 import CryptoJS from 'crypto-js';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { STORAGE_KEYS } from '../config/constants';
-import uuid from "react-native-uuid";
 
 class EncryptionUtil {
   private encryptionKey: string | null = null;
+
+  /**
+   * Generate a secure random encryption key using CryptoJS
+   * Returns a 64-character hexadecimal string (256 bits)
+   */
+  private generateEncryptionKey(): string {
+    // Generate 32 random bytes (256 bits) for AES-256 encryption
+    const randomBytes = CryptoJS.lib.WordArray.random(32);
+    return randomBytes.toString(CryptoJS.enc.Hex);
+  }
 
   async getEncryptionKey(): Promise<string> {
     if (this.encryptionKey) {
@@ -17,7 +24,7 @@ class EncryptionUtil {
       let key = await AsyncStorage.getItem(STORAGE_KEYS.ENCRYPTION_KEY);
 
       if (!key) {
-        key = uuid.v4().replace(/-/g, '') + uuid.v4().replace(/-/g, '');
+        key = this.generateEncryptionKey();
         await AsyncStorage.setItem(STORAGE_KEYS.ENCRYPTION_KEY, key);
       }
 
@@ -26,7 +33,7 @@ class EncryptionUtil {
     } catch (error) {
       console.error('Error getting encryption key:', error);
       if (!this.encryptionKey) {
-        this.encryptionKey = uuid.v4().replace(/-/g, '') + uuid.v4().replace(/-/g, '');
+        this.encryptionKey = this.generateEncryptionKey();
       }
       return this.encryptionKey;
     }
