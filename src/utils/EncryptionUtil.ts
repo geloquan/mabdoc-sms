@@ -1,7 +1,6 @@
 import CryptoJS from 'crypto-js';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { STORAGE_KEYS } from '../config/constants';
-import { v4 as uuidv4 } from 'uuid';
 
 class EncryptionUtil {
   private encryptionKey: string | null = null;
@@ -12,8 +11,8 @@ class EncryptionUtil {
     let key = await AsyncStorage.getItem(STORAGE_KEYS.ENCRYPTION_KEY);
 
     if (!key) {
-      // Generate a 256-bit (32-byte) key by concatenating two UUIDs
-      key = uuidv4().replace(/-/g, '') + uuidv4().replace(/-/g, '');
+      // Generate a cryptographically secure 256-bit (32-byte) key
+      key = CryptoJS.lib.WordArray.random(32).toString(CryptoJS.enc.Hex);
       await AsyncStorage.setItem(STORAGE_KEYS.ENCRYPTION_KEY, key);
     }
 
