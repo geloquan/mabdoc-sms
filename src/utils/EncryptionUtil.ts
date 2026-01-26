@@ -26,27 +26,34 @@ class EncryptionUtil {
    * Encrypt data using AES-256-CBC
    */
   async encrypt(data: any): Promise<string> {
+    console.log('=== Encrypting data ===');
+
     try {
       const key = await this.getEncryptionKey();
+
+      console.log('Encryption key retrieved:', key);
+
       const plaintext = JSON.stringify(data);
 
-      // Generate random IV (16 bytes for AES)
+      console.log('Encrypting plaintext:', plaintext);
+
       const iv = CryptoJS.lib.WordArray.random(16);
-      
-      // Convert key to WordArray
+
+      console.log('Generated IV for encryption:', iv.toString(CryptoJS.enc.Hex));
+
       const keyWordArray = CryptoJS.enc.Hex.parse(key);
 
-      // Encrypt using AES-256-CBC
+      console.log('Encrypting data with key:', key);
+
       const encrypted = CryptoJS.AES.encrypt(plaintext, keyWordArray, {
         iv: iv,
         mode: CryptoJS.mode.CBC,
         padding: CryptoJS.pad.Pkcs7,
       });
 
-      // Return IV and ciphertext separated by colon
       const ivHex = iv.toString(CryptoJS.enc.Hex);
       const ciphertext = encrypted.ciphertext.toString(CryptoJS.enc.Hex);
-      
+
       return `${ivHex}:${ciphertext}`;
     } catch (error) {
       console.error('Encryption failed:', error);
@@ -86,7 +93,7 @@ class EncryptionUtil {
 
       // Convert to UTF-8 string
       const decryptedText = decrypted.toString(CryptoJS.enc.Utf8);
-      
+
       if (!decryptedText) {
         throw new Error('Decryption failed - invalid key or corrupted data');
       }
