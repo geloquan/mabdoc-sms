@@ -1,8 +1,7 @@
-import 'react-native-get-random-values';
-import Aes from 'react-native-aes-crypto';
+import CryptoJS from 'crypto-js';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { STORAGE_KEYS } from '../config/constants';
-import uuid from 'react-native-uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 class EncryptionUtil {
   private encryptionKey: string | null = null;
@@ -13,9 +12,8 @@ class EncryptionUtil {
     let key = await AsyncStorage.getItem(STORAGE_KEYS.ENCRYPTION_KEY);
 
     if (!key) {
-      key =
-        uuid.v4().toString().replace(/-/g, '') +
-        uuid.v4().toString().replace(/-/g, '');
+      // Generate a 256-bit (32-byte) key by concatenating two UUIDs
+      key = uuidv4().replace(/-/g, '') + uuidv4().replace(/-/g, '');
       await AsyncStorage.setItem(STORAGE_KEYS.ENCRYPTION_KEY, key);
     }
 
@@ -23,33 +21,32 @@ class EncryptionUtil {
     return key;
   }
 
-  private async getKeyAndIv() {
-    const key = await this.getEncryptionKey();
-
-    const derivedKey = await Aes.sha256(key);
-
-    // 16-byte IV
-    const iv = (await Aes.randomKey(16)).toString();
-
-    return { derivedKey, iv };
-  }
-
   /**
    * Encrypt data using AES-256-CBC
    */
   async encrypt(data: any): Promise<string> {
     try {
-      const { derivedKey, iv } = await this.getKeyAndIv();
+      const key = await this.getEncryptionKey();
       const plaintext = JSON.stringify(data);
 
-      const cipher = await Aes.encrypt(
-        plaintext,
-        derivedKey,
-        iv,
-        'aes-256-cbc'
-      );
+      // Generate random IV (16 bytes for AES)
+      const iv = CryptoJS.lib.WordArray.random(16);
+      
+      // Convert key to WordArray
+      const keyWordArray = CryptoJS.enc.Hex.parse(key);
 
-      return `${iv}:${cipher}`;
+      // Encrypt using AES-256-CBC
+      const encrypted = CryptoJS.AES.encrypt(plaintext, keyWordArray, {
+        iv: iv,
+        mode: CryptoJS.mode.CBC,
+        padding: CryptoJS.pad.Pkcs7,
+      });
+
+      // Return IV and ciphertext separated by colon
+      const ivHex = iv.toString(CryptoJS.enc.Hex);
+      const ciphertext = encrypted.ciphertext.toString(CryptoJS.enc.Hex);
+      
+      return `${ivHex}:${ciphertext}`;
     } catch (error) {
       console.error('Encryption failed:', error);
       throw new Error('Encryption failed');
@@ -62,22 +59,38 @@ class EncryptionUtil {
   async decrypt(encryptedData: string): Promise<any> {
     try {
       const key = await this.getEncryptionKey();
-      const derivedKey = await Aes.sha256(key);
 
-      const [iv, cipher] = encryptedData.split(':');
+      const [ivHex, ciphertext] = encryptedData.split(':');
 
-      if (!iv || !cipher) {
+      if (!ivHex || !ciphertext) {
         throw new Error('Invalid encrypted payload');
       }
 
-      const decrypted = await Aes.decrypt(
-        cipher,
-        derivedKey,
-        iv,
-        'aes-256-cbc'
-      );
+      // Convert hex strings to WordArrays
+      const iv = CryptoJS.enc.Hex.parse(ivHex);
+      const keyWordArray = CryptoJS.enc.Hex.parse(key);
+      const ciphertextWordArray = CryptoJS.enc.Hex.parse(ciphertext);
 
-      return JSON.parse(decrypted);
+      // Create cipher params object
+      const cipherParams = CryptoJS.lib.CipherParams.create({
+        ciphertext: ciphertextWordArray,
+      });
+
+      // Decrypt using AES-256-CBC
+      const decrypted = CryptoJS.AES.decrypt(cipherParams, keyWordArray, {
+        iv: iv,
+        mode: CryptoJS.mode.CBC,
+        padding: CryptoJS.pad.Pkcs7,
+      });
+
+      // Convert to UTF-8 string
+      const decryptedText = decrypted.toString(CryptoJS.enc.Utf8);
+      
+      if (!decryptedText) {
+        throw new Error('Decryption failed - invalid key or corrupted data');
+      }
+
+      return JSON.parse(decryptedText);
     } catch (error) {
       console.error('Decryption failed:', error);
       throw new Error('Decryption failed');
