@@ -11,9 +11,10 @@ import {encode} from 'base-64';
 import LogStorageService from './LogStorageService';
 import QueueStorageService from './QueueStorageService';
 import AuthService from './AuthService';
-import {v4 as uuidv4} from 'uuid';
+import uuid from 'react-native-uuid';
 import SendSMS, {AndroidSuccessTypes} from 'react-native-sms';
 import {ClaimQueueJobResource, SmsPayload} from "../types/api-resource.ts";
+import {ClaimQueueJobRequest} from "../types/api-request.ts";
 
 class ApiService {
   private async ensureAuthenticated(settings: AppSettings): Promise<boolean> {
@@ -36,30 +37,10 @@ class ApiService {
     return false;
   }
 
-  private async getHeaders(): Promise<Record<string, string>> {
-    const token = await AuthService.getToken();
-
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-    };
-
-    if (token) {
-      headers.Authorization = `Bearer ${token}`;
-    }
-
-    return headers;
-  }
-
-  private generateId(): string {
-    const id = uuidv4();
-    console.log('🆔 Generated ID:', id);
-    return id;
-  }
-
   private async authenticatedFetch(
     url: string,
     options: RequestInit,
+    body: any = null,
   ): Promise<any> {
     console.log('🌐 Making authenticated request...');
     console.log('📍 URL:', url);
@@ -85,14 +66,24 @@ class ApiService {
       const response = await fetch(url, {
         ...options,
         headers,
+        body: body ? JSON.stringify(body) : null,
       });
 
+      if (response.status === 204) {
+        return null;
+      }
+
+      const responseJson = await response.json();
+
+      console.log('📥 Raw response:', responseJson);
 
       const text = await response.text();
 
+      console.log('📥 Text response:', text);
+
       const cleanText = text.replace(/`/g, '').trim();
 
-      if (response.status === 401) {
+      if (responseJson.status === 401) {
         await AuthService.clearToken();
         throw new Error('Unauthorized - token invalid or expired');
       }
@@ -106,8 +97,8 @@ class ApiService {
       console.log('📥 Parsed response:', parsed);
 
       return parsed;
-
     } catch (error) {
+      console.error('❌ Error during authenticated fetch:', error);
       throw error;
     }
   }
@@ -128,14 +119,19 @@ class ApiService {
       const url = `${settings.apiUrl}${API_ENDPOINTS.SMS}`;
       console.log('📍 Fetching SMS data from:', url);
 
+      const requestBody: ClaimQueueJobRequest = {
+        job_types: ['send_sms']
+      };
+
       const response = await this.authenticatedFetch(
         url,
         {
           method: 'POST',
-        }
+        },
+        requestBody
       );
 
-      if (response.status === 204) {
+      if (response === null) {
         return {success: true, data: null};
       }
 
@@ -144,10 +140,10 @@ class ApiService {
       }
 
       const jobResource = await response as {
-        job: ClaimQueueJobResource
+        job: ClaimQueueJobResource | null;
       };
 
-      const job: ClaimQueueJobResource = jobResource.job;
+      const job = jobResource.job;
 
       if (!job) {
         console.log('ℹ️ No job available');
@@ -174,6 +170,7 @@ class ApiService {
         data: job,
       };
     } catch (error) {
+      console.error('❌ ===== FETCH SMS DATA ERROR =====');
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
@@ -182,6 +179,7 @@ class ApiService {
   }
 
   async sendSms(phoneNumber: string, message: string) {
+    console.log('📤 ===== SEND SMS START =====');
     await SendSMS.send(
       {
         body: message,
@@ -327,6 +325,13 @@ class ApiService {
       };
     }
   }
+
+  private generateId(): string {
+    const id = uuid.v4();
+    console.log('🆔 Generated ID:', id);
+    return id;
+  }
+
 }
 
 export default new ApiService();

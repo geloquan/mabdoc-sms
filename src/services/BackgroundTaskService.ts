@@ -19,17 +19,14 @@ class BackgroundTaskService {
       return;
     }
 
-    // Initialize SMS Fetching Service
     await SmsFetchingService.initialize();
 
     this.isRunning = true;
     const settings = await SettingsService.getSettings();
 
-    // Start SMS data fetching with cooldown-based approach
     const scheduleSmsTask = async () => {
       if (!this.isRunning) return;
 
-      // Skip if a request is already in progress
       if (this.isSmsRequestInProgress) {
         console.log('SMS request already in progress, skipping this cycle');
         this.smsTimeoutId = setTimeout(scheduleSmsTask, settings.smsInterval * 1000);
@@ -39,10 +36,9 @@ class BackgroundTaskService {
       this.isSmsRequestInProgress = true;
       try {
         const currentSettings = await SettingsService.getSettings();
-        
-        // Use centralized SmsFetchingService
+
         const response = await SmsFetchingService.fetchAndProcessSms(currentSettings);
-        
+
         if (response.status === 'success') {
           console.log('SMS data fetched and processed successfully');
         } else if (response.status === 'no_job') {
@@ -54,7 +50,6 @@ class BackgroundTaskService {
         console.error('Error in SMS task:', error);
       } finally {
         this.isSmsRequestInProgress = false;
-        // Schedule next execution after the request completes (cooldown)
         if (this.isRunning) {
           this.smsTimeoutId = setTimeout(scheduleSmsTask, settings.smsInterval * 1000);
         }

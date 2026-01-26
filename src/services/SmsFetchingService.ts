@@ -4,7 +4,7 @@ import { STORAGE_KEYS } from '../config/constants';
 import SmsResponseStorageService from './SmsResponseStorageService';
 import ApiService from './ApiService';
 import SystemMonitorService from './SystemMonitorService';
-import { v4 as uuidv4 } from 'uuid';
+import uuid from 'react-native-uuid';
 import { ClaimQueueJobResource, SmsPayload } from '../types/api-resource';
 
 class SmsFetchingService {
@@ -67,13 +67,12 @@ class SmsFetchingService {
    * This is the centralized method that should be called by background service
    */
   async fetchAndProcessSms(settings: AppSettings): Promise<SmsResponse> {
-    const startTime = Date.now();
-    const responseId = uuidv4();
-
     console.log('📱 ===== FETCH AND PROCESS SMS START =====');
+    const startTime = Date.now();
+    const responseId = uuid.v4();
+
     console.log('📱 Response ID:', responseId);
 
-    // Check if paused
     if (this.state.isPaused) {
       console.log('⏸️ SMS fetching is paused, skipping...');
       const response: SmsResponse = {
@@ -85,23 +84,19 @@ class SmsFetchingService {
           duration: Date.now() - startTime,
         },
       };
-      // Return early without saving when paused
       return response;
     }
 
     try {
-      // Get system health for metadata
       const health = await SystemMonitorService.getSystemHealth();
 
-      // Fetch SMS data from API
       const apiResponse = await ApiService.fetchSmsData(settings);
 
       const duration = Date.now() - startTime;
 
-      // Process the response
       if (!apiResponse.success) {
         console.error('❌ API call failed:', apiResponse.error);
-        
+
         const response: SmsResponse = {
           id: responseId,
           timestamp: startTime,
@@ -114,23 +109,20 @@ class SmsFetchingService {
           },
         };
 
-        // Update state
         this.state.totalFetched++;
         this.state.totalFailed++;
         this.state.lastFetchTimestamp = startTime;
         await this.saveState();
 
-        // Save response
         await SmsResponseStorageService.addResponse(response);
 
         console.log('📱 ===== FETCH AND PROCESS SMS END (FAILED) =====');
         return response;
       }
 
-      // Check if there was a job
       if (!apiResponse.data) {
         console.log('ℹ️ No job available');
-        
+
         const response: SmsResponse = {
           id: responseId,
           timestamp: startTime,
@@ -177,13 +169,11 @@ class SmsFetchingService {
         },
       };
 
-      // Update state
       this.state.totalFetched++;
       this.state.totalSuccess++;
       this.state.lastFetchTimestamp = startTime;
       await this.saveState();
 
-      // Save response
       await SmsResponseStorageService.addResponse(response);
 
       console.log('📱 ===== FETCH AND PROCESS SMS END (SUCCESS) =====');
@@ -191,7 +181,7 @@ class SmsFetchingService {
 
     } catch (error) {
       console.error('❌ Error in fetchAndProcessSms:', error);
-      
+
       const response: SmsResponse = {
         id: responseId,
         timestamp: startTime,
@@ -202,13 +192,11 @@ class SmsFetchingService {
         },
       };
 
-      // Update state
       this.state.totalFetched++;
       this.state.totalFailed++;
       this.state.lastFetchTimestamp = startTime;
       await this.saveState();
 
-      // Save response
       await SmsResponseStorageService.addResponse(response);
 
       console.log('📱 ===== FETCH AND PROCESS SMS END (ERROR) =====');
