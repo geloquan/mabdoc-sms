@@ -4,6 +4,9 @@
 
 /* global jest */
 
+// Import polyfill for secure random values (required for crypto-js)
+import 'react-native-get-random-values';
+
 // Mock AsyncStorage with in-memory storage
 const mockStorage = new Map();
 
