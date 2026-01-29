@@ -1,5 +1,3 @@
-// Polyfill for secure random values (required for crypto-js in React Native)
-import 'react-native-get-random-values';
 import CryptoJS from 'crypto-js';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { STORAGE_KEYS } from '../config/constants';

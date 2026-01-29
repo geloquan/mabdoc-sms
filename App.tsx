@@ -18,7 +18,6 @@ import BackgroundTaskService from './src/services/BackgroundTaskService';
 import SystemMonitorService from './src/services/SystemMonitorService';
 import AuthService from "./src/services/AuthService.ts";
 import SettingsService from "./src/services/SettingsService.ts";
-import 'react-native-get-random-values';
 
 function App() {
   return (
